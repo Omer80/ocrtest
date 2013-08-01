@@ -55,9 +55,8 @@ def rolling_window_2d(A, xsize = 3, ysize = 3):
     rolling window for 2D arrays. doesn't work properly if step >1
     """
     xstep = ystep = 1
-    all_windows = as_strided(A, ((A.shape[0] - xsize + 1) / xstep, (A.shape[1] - ysize + 1) / ystep, xsize, ysize),
+    return as_strided(A, ((A.shape[0] - xsize + 1) / xstep, (A.shape[1] - ysize + 1) / ystep, xsize, ysize),
                              (A.strides[0] * xstep, A.strides[1] * ystep, A.strides[0], A.strides[1]))
-    return all_windows
 
 
 def main():

@@ -41,19 +41,23 @@ def save_sub_images(image, filename = 'image_%04d.jpg', h_size = 3, v_size = 3):
         for c in range(0, image.shape[1], h_size):
             if (c + h_size ) > image.shape[1]:
                 if (r + v_size ) > image.shape[0]:
-                    imsave(filename % i, image[image.shape[0] - v_size:, image.shape[1] - h_size:])
+                    im = image[image.shape[0] - v_size:, image.shape[1] - h_size:]
                 else:
-                    imsave(filename % i, image[r:r + v_size, image.shape[1] - h_size:])
+                    im = image[r:r + v_size, image.shape[1] - h_size:]
             else:
                 if (r + v_size ) > image.shape[0]:
-                    imsave(filename % i, image[image.shape[0] - v_size:, c:c + h_size])
+                    im = image[image.shape[0] - v_size:, c:c + h_size]
                 else:
-                    imsave(filename % i, image[r:r + v_size, c:c + h_size])
-            i +=1
+                    im = image[r:r + v_size, c:c + h_size]
+
+            if sum(im).all() > 0:
+                imsave(filename % i, im)
+                i +=1
 
 
 def main():
-    in_dir = './in/'
+    # in_dir = './in/'
+    in_dir = '/mnt/hgfs/Virtual Machines/for_training/'
     out_dir = './out/'
 
     # A = np.arange(120).reshape((10, 12))

@@ -1,60 +1,70 @@
 import csv
-import os
-import logging
-
-from process_image import Image
+import random
 
 
-class Dataset(object):
-    def __init__(self, imageFolder, interestingWindowsFolder=None):
-        self.positiveExamples = []
-        self.negativeExamples = []
-        self.imageFolder = imageFolder
-        self.interestingWindowsFolder = interestingWindowsFolder
-        if interestingWindowsFolder:
-            os.makedirs(interestingWindowsFolder)
-        self.tagPosition = None
-        tagInformationParts = imageFolder.rsplit('_', 1)
-        if len(tagInformationParts) > 1:
-            tagInformationString = tagInformationParts[1]
-            tagCoords = tagInformationString.split('x')
-            if len(tagCoords) == 4:
-                self.tagPosition = map(int, tagCoords)
+def balanceDataset(positiveExamples, negativeExamples, testPart=0.3, negativeMultiplicator=3, seed=8172635):
+    positiveExamples = list(positiveExamples)
+    negativeExamples = list(negativeExamples)
+    random.seed(seed)
+    random.shuffle(positiveExamples)
+    random.shuffle(negativeExamples)
 
-    def directoryProcess(self):
-        acceptableExtensions = ('jpg', 'jpeg', 'png')
-        for filename in os.listdir(self.imageFolder):
-            if filename.endswith(acceptableExtensions):
-                logging.debug('Processing %s' % (filename,))
-                print('Processing %s' % (filename,))
-                if self.interestingWindowsFolder:
-                    name, extension = os.path.splitext(filename)
-                    positiveImageTemplate = os.path.join(self.interestingWindowsFolder, name + '_%d' + extension)
-                else:
-                    positiveImageTemplate = None
-                image = Image(os.path.join(self.imageFolder, filename), tagPosition=self.tagPosition)
-                positive, negative = image.process(positiveImageTemplate=positiveImageTemplate)
-                if self.tagPosition and len(positive) == 0:
-                    logging.warning('No positive windows were created in image: %s' % (filename,))
-                self.positiveExamples.extend(positive)
-                self.negativeExamples.extend(negative)
+    positiveAmount = len(positiveExamples)
+    if positiveAmount * negativeMultiplicator > len(negativeExamples):
+        negativeAmount = len(negativeExamples)
+    else:
+        negativeAmount = positiveAmount * negativeMultiplicator
+        negativeExamples = negativeExamples[:negativeAmount]
 
-    def saveCSV(self, positiveFilename, negativeFilename):
-        with open(positiveFilename, 'wb') as f:
-            writer = csv.writer(f)
-            writer.writerows(self.positiveExamples)
+    positiveDelimiter = int(positiveAmount * (1 - testPart))
+    trainPositive = positiveExamples[:positiveDelimiter]
+    testPositive = positiveExamples[positiveDelimiter:]
 
-        with open(negativeFilename, 'wb') as f:
-            writer = csv.writer(f)
-            writer.writerows(self.negativeExamples)
+    negativeDelimiter = int(negativeAmount * (1 - testPart))
+    trainNegative = negativeExamples[:negativeDelimiter]
+    testNegative = negativeExamples[negativeDelimiter:]
+
+    trainDataset = trainPositive + trainNegative
+    trainLabels = [1] * len(trainPositive) + [0] * len(trainNegative)
+    trainIndexes = range(0, len(trainDataset))
+    random.shuffle(trainIndexes)
+    trainDataset = [trainDataset[i] for i in trainIndexes]
+    trainLabels = [trainLabels[i] for i in trainIndexes]
+
+    testDataset = testPositive + testNegative
+    testLabels = [1] * len(testPositive) + [0] * len(testNegative)
+    testIndexes = range(0, len(testDataset))
+    random.shuffle(testIndexes)
+    testDataset = [testDataset[i] for i in testIndexes]
+    testLabels = [testLabels[i] for i in testIndexes]
+
+    return trainDataset, trainLabels, testDataset, testLabels
+
+
+def loadCSVDataset(filename):
+    with open(filename, 'r') as f:
+        reader = csv.reader(f)
+        data = []
+        for row in reader:
+            data.append(row)
+
+    return data
+
+
+def saveCSVDataset(filename, dataset, labels):
+    with open(filename, 'wb') as f:
+        writer = csv.writer(f)
+        writer.writerows([d + [l] for d, l in zip(dataset, labels)])
+
 
 if __name__ == '__main__':
     import sys
-    if len(sys.argv) < 4:
-        print 'USAGE:\n\t' + sys.argv[0] + ' folderWithImages positive.csv negative.csv'
-        print 'folderWithImages name format: folderName_X1xY1xX2xY2, where X1xY1xX2xY2 coordinates of rectangle with hashtag'
+    if len(sys.argv) < 5:
+        print 'USAGE:\n\t' + sys.argv[0] + ' positive.csv negative.csv train.csv test.csv'
         sys.exit(1)
 
-    d = Dataset(sys.argv[1], sys.argv[1] + '_interesting')
-    d.directoryProcess()
-    d.saveCSV(sys.argv[2], sys.argv[3])
+    pos = loadCSVDataset(sys.argv[1])
+    neg = loadCSVDataset(sys.argv[2])
+    trainDataset, trainLabels, testDataset, testLabels = balanceDataset(pos, neg)
+    saveCSVDataset(sys.argv[3], trainDataset, trainLabels)
+    saveCSVDataset(sys.argv[4], testDataset, testLabels)

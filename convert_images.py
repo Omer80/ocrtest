@@ -13,9 +13,10 @@ Reads images from IN directory, converts to gray, resizes and stores as jpg into
 """
 
 def img_convert(f):
-    return resize(rgb2gray(imread(f)),(30,30))
+    return resize(rgb2gray(imread(f)),(18,18))
 
-in_dir = './in/'
+# in_dir = './in/'
+in_dir = '/mnt/hgfs/Virtual Machines/twitter_logos/'
 out_dir = './out/'
 
 icol = ImageCollection(in_dir+'*.jpg:'+in_dir+'*.png:'+in_dir+'*.gif', load_func=img_convert)

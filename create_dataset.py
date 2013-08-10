@@ -54,7 +54,7 @@ def loadCSVDataset(filename):
 def saveCSVDataset(filename, dataset, labels):
     with open(filename, 'wb') as f:
         writer = csv.writer(f)
-        writer.writerows([d + [l] for d, l in zip(dataset, labels)])
+        writer.writerows([list(d) + [l] for d, l in zip(dataset, labels)])
 
 
 if __name__ == '__main__':

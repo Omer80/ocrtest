@@ -12,6 +12,7 @@ from skimage.transform import resize
 
 
 
+
 class ImagesPreparationTool:
 
 
@@ -76,9 +77,26 @@ class ImagesPreparationTool:
                 im = rgb2gray(im)
             imsave(os.path.join(dir_out, 'image%05d.jpg' % i), im)
 
+    def __image_to_csv_string(self, im, classification_value):
+        return ','.join("{0}".format(item) for item in im.ravel())+','+str(classification_value)
 
+    def images_to_csv_file(self, dir_positive, dir_negative, filename):
+        positive_images = self.__read_images_in_dir(dir_positive)
+        negative_images = self.__read_images_in_dir(dir_negative)
+        if (len(negative_images) > len(positive_images) * 3 ):
+            negative_images = negative_images[:len(positive_images)* 3]
+            # print "cut negative images"
 
+        with open(filename,"w+b") as f:
+            for pfilename in positive_images:
+                im = imread(os.path.join(dir_positive, pfilename), True)
+                f.write(self.__image_to_csv_string(im,1))
+                f.write('\n')
 
+            for nfilename in negative_images:
+                im = imread(os.path.join(dir_negative, nfilename), True)
+                f.write(self.__image_to_csv_string(im,0))
+                f.write('\n')
 
 
 def main():
@@ -89,10 +107,7 @@ def main():
     # tool.slice_images("/mnt/hgfs/Virtual Machines/selected_images/", out_dir, 18, 18)
     # tool.resize_images("/mnt/hgfs/Virtual Machines/twitter_logos_orig/", out_dir, 18, 18)
 
-    im = np.arange(120).reshape((10, 12))
-    print im
-    im = im.reshape()
-
+    tool.images_to_csv_file('/mnt/hgfs/Virtual Machines/for_training/positive/1', '/mnt/hgfs/Virtual Machines/for_training/negative/', './out/training.csv')
 
 
 

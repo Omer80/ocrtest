@@ -1,19 +1,22 @@
 import csv
 
+
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC, NuSVC
 from sklearn import metrics
+from sklearn.externals import joblib
 
 import numpy as np
 
 
-def test_classifier(classifier, trainData, trainLabel, testData, testLabel):
+def test_classifier(classifier, name, trainData, trainLabel, testData, testLabel):
     classifier.fit(trainData, trainLabel)
     testPredicted = classifier.predict(testData)
     print 'Accuracy: ', metrics.zero_one_score(testLabel, testPredicted)
     print 'F1-score: ', metrics.f1_score(testLabel, testPredicted)
     print metrics.classification_report(testLabel, testPredicted)
+    joblib.dump(classifier, './persisted/'+name+'.pkl')
 
 
 def test_bunch_of_classifiers(trainData, trainLabel, testData, testLabel):
@@ -26,7 +29,7 @@ def test_bunch_of_classifiers(trainData, trainLabel, testData, testLabel):
     for name, cl in classifiers:
         c = cl()
         print name
-        test_classifier(c, trainData, trainLabel, testData, testLabel)
+        test_classifier(c, name, trainData, trainLabel, testData, testLabel)
 
 
 def test_svc(trainData, trainLabel, testData, testLabel):

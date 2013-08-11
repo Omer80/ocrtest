@@ -3,3 +3,5 @@
 /out
 *.csv
 *.gzip
+/persisted/*.pkl
+/persisted/*.npy

@@ -1,3 +1,5 @@
 /.idea
 /in
 /out
+*.csv
+*.gzip

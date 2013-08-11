@@ -79,7 +79,7 @@ def main():
             if (sum(all_windows[i,j])).all() == 0: #skip empty black images
                 continue
             if i == j: #store to disc only diagonal images
-                imsave(os.path.join('./out/', 'image%06d.jpg' % n), all_windows[i,j])
+                imsave(os.path.join('../out/', 'image%06d.jpg' % n), all_windows[i,j])
             n += 1
     print n
 

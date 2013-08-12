@@ -41,7 +41,7 @@ def balanceDataset(positiveExamples, negativeExamples, testPart=0.3, negativeMul
     return trainDataset, trainLabels, testDataset, testLabels
 
 
-def loadCSVDataset(filename):
+def loadCSVFeaturesDataset(filename):
     with open(filename, 'r') as f:
         reader = csv.reader(f)
         data = []
@@ -51,7 +51,7 @@ def loadCSVDataset(filename):
     return data
 
 
-def saveCSVDataset(filename, dataset, labels):
+def saveCSVFeaturesDataset(filename, dataset, labels):
     with open(filename, 'wb') as f:
         writer = csv.writer(f)
         writer.writerows([list(d) + [l] for d, l in zip(dataset, labels)])
@@ -63,8 +63,8 @@ if __name__ == '__main__':
         print 'USAGE:\n\t' + sys.argv[0] + ' positive.csv negative.csv train.csv test.csv'
         sys.exit(1)
 
-    pos = loadCSVDataset(sys.argv[1])
-    neg = loadCSVDataset(sys.argv[2])
+    pos = loadCSVFeaturesDataset(sys.argv[1])
+    neg = loadCSVFeaturesDataset(sys.argv[2])
     trainDataset, trainLabels, testDataset, testLabels = balanceDataset(pos, neg)
-    saveCSVDataset(sys.argv[3], trainDataset, trainLabels)
-    saveCSVDataset(sys.argv[4], testDataset, testLabels)
+    saveCSVFeaturesDataset(sys.argv[3], trainDataset, trainLabels)
+    saveCSVFeaturesDataset(sys.argv[4], testDataset, testLabels)

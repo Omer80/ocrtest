@@ -6,7 +6,7 @@ from sklearn.svm import SVC, NuSVC
 from sklearn import metrics
 from sklearn.externals import joblib
 
-import numpy as np
+from utils import loadDataset
 
 
 def test_classifier(classifier, trainData, trainLabel, testData, testLabel):
@@ -36,16 +36,6 @@ def test_svc(trainData, trainLabel, testData, testLabel):
     c = NuSVC(nu=0.05)
     test_classifier(c, trainData, trainLabel, testData, testLabel)
 
-
-def loadDataset(filename):
-    with open(filename, 'r') as f:
-        reader = csv.reader(f)
-        data, label = [], []
-        for line in reader:
-            data.append(map(float, line[:-1]))
-            label.append(int(line[-1]))
-
-    return np.array(data), np.array(label)
 
 if __name__ == '__main__':
     import sys

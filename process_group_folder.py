@@ -1,7 +1,7 @@
 import os
 import random
 
-from create_dataset import balanceDataset, saveCSVDataset
+from create_dataset import balanceDataset, saveCSVFeaturesDataset
 from extract_raw_features import RawFeaturesExtractor
 
 
@@ -35,5 +35,5 @@ if __name__ == '__main__':
 
     positive, negative = process_base_folder(sys.argv[1], negativeMultiplicator=3)
     trainDataset, trainLabels, testDataset, testLabels = balanceDataset(positive, negative)
-    saveCSVDataset(sys.argv[2], trainDataset, trainLabels)
-    saveCSVDataset(sys.argv[3], testDataset, testLabels)
+    saveCSVFeaturesDataset(sys.argv[2], trainDataset, trainLabels)
+    saveCSVFeaturesDataset(sys.argv[3], testDataset, testLabels)

@@ -24,11 +24,11 @@ class Image(object):
         self.finalWindowResolution = (32, 32)
 
     def prepare(self):
-        sourceImage = rgb2gray(imread(self.imagePath))
+        self.sourceImage = rgb2gray(imread(self.imagePath))
         # remove black borders from image
-        iim = sourceImage > 0
+        iim = self.sourceImage > 0
         self.bounds = ndimage.find_objects(iim)[0]
-        self.image = sourceImage[self.bounds[0], self.bounds[1]]
+        self.image = self.sourceImage[self.bounds[0], self.bounds[1]]
         # get new tag position after cutting the image
         if self.tagPosition:
             t, b = self.tagPosition, self.bounds
@@ -39,6 +39,7 @@ class Image(object):
 
         # count rows/columns amount
         s = ((np.array(self.image.shape) - np.array(windowSize)) // np.array(shiftSize)) + 1
+        self.windowsAmountInfo = s
         windows = sliding_window(self.image, windowSize, shiftSize)
         self.positiveExamples = []
         self.negativeExamples = []

@@ -7,7 +7,7 @@ from sklearn.externals import joblib
 from sklearn.grid_search import GridSearchCV, RandomizedSearchCV
 from sklearn.svm import SVC, NuSVC
 
-from create_classificator import loadDataset
+from utils import loadDataset
 
 
 class COptimization(object):
@@ -27,11 +27,13 @@ class COptimization(object):
         for i, name in enumerate(self.parameterNames):
             p[name] = params[i]
         p.update(self.defaultParameters)
+        print p
         clf = self.classifierFactory(**p)
         scores = cross_validation.cross_val_score(clf, self.trainData, self.trainLabel, cv=self.cv, scoring='f1')
+        print scores.mean()
         if self.best_scores is None or self.best_scores < scores.mean():
             self.best_scores = scores.mean()
-            self.best_params = params
+            self.best_params = p
         return scores.mean()
 
     def getBestClassifier(self):
@@ -45,7 +47,8 @@ class COptimization(object):
 def pso_svc_optimization(trainData, trainLabel):
     co = COptimization(['C', 'gamma'], {'kernel': 'rbf'}, SVC, trainData, trainLabel)
     x0 = np.array([5, 0.0001])
-    psoo = optimization.ParticleSwarmOptimizer(co, x0, boundaries=((1, 10), (0.0001, 0.001)), size=5)
+    psoo = optimization.ParticleSwarmOptimizer(co, x0, boundaries=((70, 170), (0.0001, 0.5)), size=3)
+    psoo.maxEvaluations = 12
     psoo.learn()
     return co
 
@@ -67,7 +70,7 @@ def gridSearch(classifier, params, trainData, trainLabel):
 def randomizedSearch(classifier, trainData, trainLabel):
     params = {'C': scipy.stats.expon(scale=100), 'gamma': scipy.stats.expon(scale=.1),
                 'kernel': ['rbf'], 'class_weight':['auto', None]}
-    r = RandomizedSearchCV(classifier, params, n_iter=2, cv=2)
+    r = RandomizedSearchCV(classifier, params, n_iter=12, cv=2)
     r.fit(trainData, trainLabel)
 
     print("Best parameters set found on development set:")
@@ -95,8 +98,13 @@ if __name__ == '__main__':
     # gridSearch = gridSearch(classifier, param_grid, trainData, trainLabel)
     # clf = gridSearch.best_estimator_
 
-    rs = randomizedSearch(classifier, trainData, trainLabel)
-    clf = rs.best_estimator_
+    # rs = randomizedSearch(classifier, trainData, trainLabel)
+    # clf = rs.best_estimator_
+
+    po = pso_svc_optimization(trainData, trainLabel)
+    print po.best_scores
+    print po.best_params
+    clf = po.getBestClassifier()
 
     testPredicted = clf.predict(testData)
 

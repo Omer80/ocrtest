@@ -43,7 +43,9 @@ class DatasetCreator(object):
         for filename in os.listdir(self.imageFolder):
             if filename.endswith(acceptableExtensions):
                 appropriateFiles.append(filename)
+
         self.rand.shuffle(appropriateFiles)
+
         ttSplitIndx = int(len(appropriateFiles) * (1-self.testPart))
         trainFiles = set(appropriateFiles[:ttSplitIndx])
         testFiles = set(appropriateFiles[ttSplitIndx:])
@@ -76,9 +78,11 @@ class DatasetCreator(object):
                 dataset = self.testDataset
 
             for e in positive:
-                dataset.append(np.concatenate([e, np.array([1])]))
+                # dataset.append(np.concatenate([e, np.array([1])]))
+                dataset.append(list(e) + [1])
             for e in negative:
-                dataset.append(np.concatenate([e, np.array([0])]))
+                # dataset.append(np.concatenate([e, np.array([0])]))
+                dataset.append(list(e) + [0])
 
     def saveCSV(self, trainFilename, testFilename):
         self.rand.shuffle(self.trainDataset)
@@ -102,6 +106,6 @@ if __name__ == '__main__':
         print '\nfolderWithImages name format: folderName_X1xY1xX2xY2, where X1xY1xX2xY2 coordinates of rectangle with hashtag'
         sys.exit(1)
 
-    d = DatasetCreator(os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[1]) + '_interesting')
-    d.directoryProcess()
+    d = DatasetCreator()
+    d.directoryProcess(os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[1]) + '_interesting')
     d.saveCSV(sys.argv[2], sys.argv[3])

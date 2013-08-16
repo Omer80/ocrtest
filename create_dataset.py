@@ -9,10 +9,16 @@ from process_image import Image
 
 
 class DatasetCreator(object):
-    def __init__(self, imageFolder, interestingWindowsFolder=None, testPart=0.3, negativeMultiplicator=3, seed=8172635):
+    def __init__(self, testPart=0.3, negativeMultiplicator=3, seed=8172635):
         self.trainDataset = []
         self.testDataset = []
+        self.testPart = testPart
+        self.negativeMultiplicator = negativeMultiplicator
+        self.seed = seed
+        self.rand = random.Random()
+        self.rand.seed(seed)
 
+    def set_image_folder(self, imageFolder, interestingWindowsFolder=None):
         self.imageFolder = imageFolder
         self.interestingWindowsFolder = interestingWindowsFolder
         if interestingWindowsFolder and not os.path.exists(interestingWindowsFolder):
@@ -28,13 +34,9 @@ class DatasetCreator(object):
         if self.tagPosition is None:
             raise ValueError("Incorrect folder name format. Folder MUST contain tag position information")
 
-        self.testPart = testPart
-        self.negativeMultiplicator = negativeMultiplicator
-        self.seed = seed
-        self.rand = random.Random()
-        self.rand.seed(seed)
+    def directoryProcess(self, imageFolder, interestingWindowsFolder=None):
+        self.set_image_folder(imageFolder, interestingWindowsFolder)
 
-    def directoryProcess(self):
         logger = logging.getLogger("RawFeatureExtractor")
         acceptableExtensions = ('jpg', 'jpeg', 'png')
         appropriateFiles = []

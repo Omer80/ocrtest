@@ -1,27 +1,17 @@
 import os
-import random
 
-from create_dataset import balanceDataset, saveCSVFeaturesDataset
-from extract_raw_features import RawFeaturesExtractor
+from create_dataset import DatasetCreator
 
 
-def process_base_folder(folder, prefix=None, negativeMultiplicator=None):
-    positive, negative = [], []
+def process_base_folder(folder, trainFilename, testFilename, prefix=None, negativeMultiplicator=None):
+    fe = DatasetCreator()
     for f in os.listdir(folder):
         ff = os.path.join(folder, f)
         if os.path.isdir(ff):
             if not prefix or f.startswith(prefix):
-                fe = RawFeaturesExtractor(ff)
-                fe.directoryProcess()
-                positive.extend(fe.positiveExamples)
-                if negativeMultiplicator:
-                    random.shuffle(fe.negativeExamples)
-                    negAmount = len(positive) * negativeMultiplicator
-                    negative.extend(fe.negativeExamples[:negAmount])
-                else:
-                    negative.extend(fe.negativeExamples)
+                fe.directoryProcess(ff)
 
-    return positive, negative
+    fe.saveCSV(trainFilename, testFilename)
 
 
 if __name__ == '__main__':
@@ -33,7 +23,4 @@ if __name__ == '__main__':
         print 'USAGE:\n\t' + sys.argv[0] + ' folder_with_framefolders train.csv test.csv'
         sys.exit(1)
 
-    positive, negative = process_base_folder(sys.argv[1], negativeMultiplicator=3)
-    trainDataset, trainLabels, testDataset, testLabels = balanceDataset(positive, negative)
-    saveCSVFeaturesDataset(sys.argv[2], trainDataset, trainLabels)
-    saveCSVFeaturesDataset(sys.argv[3], testDataset, testLabels)
+    positive, negative = process_base_folder(sys.argv[1], sys.argv[2], sys.argv[3], negativeMultiplicator=3)

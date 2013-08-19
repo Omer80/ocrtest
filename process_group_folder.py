@@ -23,4 +23,4 @@ if __name__ == '__main__':
         print 'USAGE:\n\t' + sys.argv[0] + ' folder_with_framefolders train.csv test.csv'
         sys.exit(1)
 
-    positive, negative = process_base_folder(sys.argv[1], sys.argv[2], sys.argv[3], negativeMultiplicator=3)
+    process_base_folder(sys.argv[1], sys.argv[2], sys.argv[3], negativeMultiplicator=3)

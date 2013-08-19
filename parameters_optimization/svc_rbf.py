@@ -19,10 +19,7 @@ class SVCRbfMetaOptimizer(MetaOptimizer):
         'kernel': ['rbf'],
         'class_weight': ['auto', None]
     }
-    randomized_iterations = 20
-
-    pso_evaluations = 20
-
+    iterations = 20
 
 
 if __name__ == '__main__':

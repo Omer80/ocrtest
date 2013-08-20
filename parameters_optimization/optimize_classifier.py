@@ -30,7 +30,7 @@ class Evaluator(object):
         self.best_params_ = None
         self.best_classifier = None
 
-        self.grid_scores = []
+        self.grid_scores_ = []
 
     def __call__(self, params):
         p = dict()
@@ -42,7 +42,7 @@ class Evaluator(object):
         scores = cross_validation.cross_val_score(clf, self.trainData, self.trainLabel, cv=self.cv, scoring='f1')
         print scores.mean()
         #todo: think about putting all scores to array/list
-        self.grid_scores.append(_CVScoreTuple(p, scores.mean(), scores))
+        self.grid_scores_.append(_CVScoreTuple(p, scores.mean(), scores))
         if self.best_score_ is None or self.best_score_ < scores.mean():
             self.best_score_ = scores.mean()
             self.best_params_ = p
@@ -130,7 +130,10 @@ class MetaOptimizer(object):
             for name in mutable_parameters:
                 startingPosition.append(self.randomized_parameters[name].rvs())
             psoo.particles.append(Particle(np.array(startingPosition), psoo.minimize))
+        psoo.neighbours = psoo.neighbourfunction(psoo.particles)
         psoo.learn()
+
+        return co
 
     def log_optimized_info(self, optimized):
         self.logger.info("Best parameters set found on development set: %s", (optimized.best_estimator_,))

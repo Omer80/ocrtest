@@ -16,6 +16,10 @@ class SVCLinearMetaOptimizer(MetaOptimizer):
     }
     iterations = 20
 
+    pso_parameters_restrictions = {
+        'C': lambda c: c > 0,
+    }
+
 
 if __name__ == '__main__':
     meta_optimizer = SVCLinearMetaOptimizer()

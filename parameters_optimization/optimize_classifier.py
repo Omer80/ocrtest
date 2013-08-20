@@ -18,9 +18,10 @@ from parameters_optimization.classifier_evaluation import ClassifierEvaluation
 
 
 class Evaluator(object):
-    def __init__(self, parameterNames, defaultParameters, classifierFactory, trainData, trainLabel, cv=2):
+    def __init__(self, parameterNames, defaultParameters, parameters_restrictions, classifierFactory, trainData, trainLabel, cv=2):
         self.parameterNames = parameterNames
         self.defaultParameters = defaultParameters
+        self.parameters_restrictions = parameters_restrictions
         self.classifierFactory = classifierFactory
         self.trainData = trainData
         self.trainLabel = trainLabel
@@ -34,10 +35,19 @@ class Evaluator(object):
 
     def __call__(self, params):
         p = dict()
+        invalid_parameters = False
+        failed_power = 3.0
         for i, name in enumerate(self.parameterNames):
             p[name] = params[i]
+            if self.parameters_restrictions and name in self.parameters_restrictions:
+                if not self.parameters_restrictions[name](params[i]):
+                    invalid_parameters = True
+                    failed_power *= params[i]
         p.update(self.defaultParameters)
         print p
+        if invalid_parameters:
+            print 'invalid: ', -abs(failed_power)
+            return -abs(failed_power)
         clf = self.classifierFactory(**p)
         scores = cross_validation.cross_val_score(clf, self.trainData, self.trainLabel, cv=self.cv, scoring='f1')
         print scores.mean()
@@ -120,7 +130,7 @@ class MetaOptimizer(object):
             elif len(variants) == 1:
                 immutable_parameters[name] = variants[0]
 
-        co = Evaluator(mutable_parameters, immutable_parameters, self.classifierFactory, self.trainData, self.trainLabel)
+        co = Evaluator(mutable_parameters, immutable_parameters, self.pso_parameters_restrictions, self.classifierFactory, self.trainData, self.trainLabel)
         x0 = np.array([0] * len(mutable_parameters))
         psoo = optimization.ParticleSwarmOptimizer(co, x0, boundaries=[(0, 1)] * len(mutable_parameters), size=5)
         psoo.maxEvaluations = self.iterations

@@ -21,6 +21,11 @@ class SVCRbfMetaOptimizer(MetaOptimizer):
     }
     iterations = 20
 
+    pso_parameters_restrictions = {
+        'C': lambda c: c > 0,
+        'gamma': lambda gamma: gamma >= 0
+    }
+
 
 if __name__ == '__main__':
     meta_optimizer = SVCRbfMetaOptimizer()

@@ -13,7 +13,7 @@ except ImportError:
     optimization = None
     Particle = None
 
-from utils import loadDataset
+from utils import loadDataset, saveClassifiersEvaluations
 from parameters_optimization.classifier_evaluation import ClassifierEvaluation
 
 
@@ -167,10 +167,10 @@ class MetaOptimizer(object):
         print 'Accuracy: ', accuracy
         print 'F1-score: ', f1_wei_avg
 
-        evaluation = ClassifierEvaluation(
+        self.evaluation = ClassifierEvaluation(
             self.name,
-            self.optimized.best_params_,
             self.optimizationMethod,
+            self.optimized.best_params_,
             accuracy,
             f1_wei_avg, p_wei_avg, r_wei_avg,
             p[1], p[0],
@@ -181,8 +181,8 @@ class MetaOptimizer(object):
 
         print metrics.classification_report(self.testLabel, testPredicted)
 
-        print evaluation
-        return evaluation
+        print self.evaluation
+        return self.evaluation
 
     def run(self):
         self.optimized = self.algorithm()
@@ -192,6 +192,7 @@ class MetaOptimizer(object):
         self.test_classifier(clf)
 
         joblib.dump(clf, self.modelFilename)
+        saveClassifiersEvaluations('evaluation.csv', [self.evaluation])
 
 
 if __name__ == '__main__':

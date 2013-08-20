@@ -1,5 +1,6 @@
 import csv
 import logging
+import ast
 
 import numpy as np
 from parameters_optimization.classifier_evaluation import ClassifierEvaluation
@@ -32,9 +33,10 @@ def loadClassifiersEvaluations(filename):
         evaluations = []
         for line in reader:
             d = line[:2]
-            d = []
-            d.extend(map(float, line[2:-2]))
-            ce = ClassifierEvaluation()
+            d.append(ast.literal_eval(line[2]))
+            d.extend(map(float, line[3:-2]))
+            d.extend(map(int, line[-2:]))
+            ce = ClassifierEvaluation(*d)
             evaluations.append(ce)
 
-    return ce
+    return evaluations

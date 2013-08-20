@@ -2,8 +2,8 @@ from collections import namedtuple
 
 ClassifierEvaluation = namedtuple('ClassifierEvaluation',
                                   ['name',
-                                   'parameters',
                                    'optimization_method',
+                                   'parameters',
                                    'accuracy',
                                    'f1', 'precision', 'recall',
                                    'precision_positive', 'precision_negative',

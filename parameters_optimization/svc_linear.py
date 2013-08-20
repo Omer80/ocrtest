@@ -7,9 +7,7 @@ from parameters_optimization.optimize_classifier import MetaOptimizer
 class SVCLinearMetaOptimizer(MetaOptimizer):
     name = 'SVC with linear kernel'
     classifierFactory = SVC
-    grid_parameters = [
-        {'C': [1, 10, 100, 350, 1000, 2500, 5000], 'kernel': ['linear']},
-    ]
+    grid_parameters = {'C': [1, 10, 100, 350, 1000, 2500, 5000], 'kernel': ['linear']}
 
     randomized_parameters = {
         'C': scipy.stats.expon(scale=100),

@@ -46,7 +46,7 @@ def optimize(mo_classifier, clf_test_params):
         iterations = ctp.iterations
 
     modelFilename = os.path.join(ctp.modelDirectory, moc.name + '.pkl')
-    moc.initialize_optimizer(ctp.optimizationMethod, modelFilename, ctp.trainData, ctp.trainLabel, ctp.testData, ctp.testLabel, iterations)
+    moc.initialize_optimizer(ctp.optimizationMethod, modelFilename, ctp.trainData, ctp.trainLabel, ctp.testData, ctp.testLabel, ctp.jobs, iterations)
 
     evaluation = moc.run()
     return evaluation

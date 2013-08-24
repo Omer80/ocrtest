@@ -102,11 +102,11 @@ class DatasetCreator(object):
     def saveTrainTestImageFilenames(self, trainImagesFilename, testImagesFilename):
         with open(trainImagesFilename, 'wb') as f:
             writer = csv.writer(f)
-            writer.writerows(self.trainFiles)
+            writer.writerows([(i,) for i in self.trainFiles])
 
         with open(testImagesFilename, 'wb') as f:
             writer = csv.writer(f)
-            writer.writerows(self.testFiles)
+            writer.writerows([(i,) for i in self.testFiles])
 
 
 if __name__ == '__main__':
@@ -122,5 +122,6 @@ if __name__ == '__main__':
     d = DatasetCreator()
     d.directoryProcess(os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[1]) + '_interesting')
     d.saveCSV(sys.argv[2], sys.argv[3])
+
     if len(sys.argv) >= 6:
         d.saveTrainTestImageFilenames(sys.argv[4], sys.argv[5])

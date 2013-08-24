@@ -3,7 +3,7 @@ import os
 from create_dataset import DatasetCreator
 
 
-def process_base_folder(folder, trainFilename, testFilename, prefix=None, negativeMultiplicator=None):
+def process_base_folder(folder, trainFilename, testFilename, trainImageFilenames=None, testImageFilenames=None, prefix=None, negativeMultiplicator=None):
     fe = DatasetCreator()
     for f in os.listdir(folder):
         ff = os.path.join(folder, f)
@@ -12,6 +12,8 @@ def process_base_folder(folder, trainFilename, testFilename, prefix=None, negati
                 fe.directoryProcess(ff)
 
     fe.saveCSV(trainFilename, testFilename)
+    if trainImageFilenames and testImageFilenames:
+        fe.saveTrainTestImageFilenames(trainImageFilenames, testImageFilenames)
 
 
 if __name__ == '__main__':
@@ -20,7 +22,13 @@ if __name__ == '__main__':
 
     import sys
     if len(sys.argv) < 4:
-        print 'USAGE:\n\t' + sys.argv[0] + ' folder_with_framefolders train.csv test.csv'
+        print 'USAGE:\n\t' + sys.argv[0] + ' folder_with_framefolders train.csv test.csv [trainFiles.csv testFiles.csv]'
         sys.exit(1)
 
-    process_base_folder(sys.argv[1], sys.argv[2], sys.argv[3], negativeMultiplicator=3)
+    if len(sys.argv) >= 6:
+        trnfn = sys.argv[4]
+        tstfn = sys.argv[5]
+    else:
+        trnfn, tstfn = None, None
+
+    process_base_folder(sys.argv[1], sys.argv[2], sys.argv[3], trnfn, tstfn, negativeMultiplicator=3)

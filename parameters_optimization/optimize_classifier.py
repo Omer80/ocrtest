@@ -73,9 +73,10 @@ class Evaluator(object):
 
 
 class MetaOptimizer(object):
-    def __init__(self):
+    def __init__(self, process_args=True):
         self.logger = logging.getLogger("MetaOptimizer")
-        self.process_arguments()
+        if process_args:
+            self.process_arguments()
         self.classifier = self.classifierFactory()
 
     def process_arguments(self):
@@ -85,13 +86,23 @@ class MetaOptimizer(object):
         parser.add_argument('model', help='File to save best model')
         parser.add_argument('-t', '--type', default='grid', choices=['grid', 'random', 'pso'], help='Search type')
         parser.add_argument('-i', '--iterations', default=self.iterations, type=int, help='Iterations amount for pso and random search')
+        parser.add_argument('-j', '--jobs', default=-1, type=int, help='Processes amount for learning')
 
         args = parser.parse_args()
-        self.optimizationMethod = args.type
-        self.iterations = args.iterations
-        self.modelFilename = args.model
-        self.trainData, self.trainLabel = loadDataset(args.train)
-        self.testData, self.testLabel = loadDataset(args.test)
+
+        trainData, trainLabel = loadDataset(args.train)
+        testData, testLabel = loadDataset(args.test)
+
+        self.initialize_optimizer(args.type, args.model, trainData, trainLabel, testData, testLabel, args.iterations)
+
+    def initialize_optimizer(self, optimizationMethod, modelFilename, trainData, trainLabel, testData, testLabel, jobs, iterations=None):
+        self.optimizationMethod = optimizationMethod
+        self.modelFilename = modelFilename
+        self.trainData, self.trainLabel = trainData, trainLabel
+        self.testData, self.testLabel = testData, testLabel
+        self.jobs = jobs
+        if iterations is not None:
+            self.iterations = iterations
 
         optimizationAlgorithms = {
             'grid': self.grid_search,
@@ -101,7 +112,7 @@ class MetaOptimizer(object):
         self.algorithm = optimizationAlgorithms[self.optimizationMethod]
 
     def grid_search(self):
-        search = GridSearchCV(self.classifier, self.grid_parameters, cv=2,  scoring='f1')
+        search = GridSearchCV(self.classifier, self.grid_parameters, cv=2,  scoring='f1', n_jobs=self.jobs)
         search.fit(self.trainData, self.trainLabel)
 
         return search
@@ -112,7 +123,8 @@ class MetaOptimizer(object):
             self.randomized_parameters,
             n_iter=self.iterations,
             cv=2,
-            scoring='f1'
+            scoring='f1',
+            n_jobs=self.jobs
         )
         rnd_search.fit(self.trainData, self.trainLabel)
 
@@ -163,7 +175,6 @@ class MetaOptimizer(object):
         r_wei_avg = np.average(r, weights=s)
         f1_wei_avg = np.average(f1, weights=s)
 
-        # todo: put this information to ClassifierEvaluation tuple, save and return it
         print 'Accuracy: ', accuracy
         print 'F1-score: ', f1_wei_avg
 
@@ -189,10 +200,13 @@ class MetaOptimizer(object):
         self.log_optimized_info(self.optimized)
 
         clf = self.optimized.best_estimator_
-        self.test_classifier(clf)
+        evaluation = self.test_classifier(clf)
 
         joblib.dump(clf, self.modelFilename)
-        saveClassifiersEvaluations('evaluation.csv', [self.evaluation])
+        return evaluation
+
+    def save_best_classifier_evaluation(self, filename, append=False):
+        saveClassifiersEvaluations(filename, [self.evaluation], append)
 
 
 if __name__ == '__main__':

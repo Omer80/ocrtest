@@ -18,7 +18,7 @@ class DatasetCreator(object):
         self.rand = random.Random()
         self.rand.seed(seed)
 
-    def set_image_folder(self, imageFolder, interestingWindowsFolder=None):
+    def set_image_folder(self, imageFolder, interestingWindowsFolder=None, YX=True):
         self.imageFolder = imageFolder
         self.interestingWindowsFolder = interestingWindowsFolder
         if interestingWindowsFolder and not os.path.exists(interestingWindowsFolder):
@@ -30,6 +30,9 @@ class DatasetCreator(object):
             tagCoords = tagInformationString.split('x')
             if len(tagCoords) == 4:
                 self.tagPosition = map(int, tagCoords)
+                if YX:
+                    tp = self.tagPosition
+                    self.tagPosition = (tp[1], tp[0], tp[3], tp[2])
 
         if self.tagPosition is None:
             raise ValueError("Incorrect folder name format. Folder MUST contain tag position information")

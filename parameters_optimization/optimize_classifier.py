@@ -93,7 +93,7 @@ class MetaOptimizer(object):
         trainData, trainLabel = loadDataset(args.train)
         testData, testLabel = loadDataset(args.test)
 
-        self.initialize_optimizer(args.type, args.model, trainData, trainLabel, testData, testLabel, args.iterations)
+        self.initialize_optimizer(args.type, args.model, trainData, trainLabel, testData, testLabel, args.jobs, args.iterations)
 
     def initialize_optimizer(self, optimizationMethod, modelFilename, trainData, trainLabel, testData, testLabel, jobs, iterations=None):
         self.optimizationMethod = optimizationMethod

@@ -11,7 +11,7 @@ def init_console_logging(level=logging.DEBUG):
 
 
 def loadDataset(filename):
-    with open(filename, 'r') as f:
+    with open(filename, 'rb') as f:
         reader = csv.reader(f)
         data, label = [], []
         for line in reader:
@@ -21,8 +21,9 @@ def loadDataset(filename):
     return np.array(data), np.array(label)
 
 
-def saveClassifiersEvaluations(filename, evaluations):
-    with open(filename, 'wb') as f:
+def saveClassifiersEvaluations(filename, evaluations, append=False):
+    mode = 'ab' if append else 'wb'
+    with open(filename, mode) as f:
         writer = csv.writer(f)
         writer.writerows(evaluations)
 

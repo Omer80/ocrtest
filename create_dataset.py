@@ -50,8 +50,8 @@ class DatasetCreator(object):
         self.rand.shuffle(appropriateFiles)
 
         ttSplitIndx = int(len(appropriateFiles) * (1-self.testPart))
-        trainFiles = set(appropriateFiles[:ttSplitIndx])
-        testFiles = set(appropriateFiles[ttSplitIndx:])
+        self.trainFiles = set(appropriateFiles[:ttSplitIndx])
+        self.testFiles = set(appropriateFiles[ttSplitIndx:])
         appropriateFilesSet = set(appropriateFiles)
 
         for filename in os.listdir(self.imageFolder):
@@ -75,7 +75,7 @@ class DatasetCreator(object):
             if negativeMAmount < len(negative):
                 negative = negative[:negativeMAmount]
 
-            if filename in trainFiles:
+            if filename in self.trainFiles:
                 dataset = self.trainDataset
             else:
                 dataset = self.testDataset
@@ -99,16 +99,28 @@ class DatasetCreator(object):
             writer = csv.writer(f)
             writer.writerows(self.testDataset)
 
+    def saveTrainTestImageFilenames(self, trainImagesFilename, testImagesFilename):
+        with open(trainImagesFilename, 'wb') as f:
+            writer = csv.writer(f)
+            writer.writerows(self.trainFiles)
+
+        with open(testImagesFilename, 'wb') as f:
+            writer = csv.writer(f)
+            writer.writerows(self.testFiles)
+
+
 if __name__ == '__main__':
     import utils
     utils.init_console_logging()
 
     import sys
     if len(sys.argv) < 4:
-        print 'USAGE:\n\t' + sys.argv[0] + ' folderWithImages train.csv test.csv'
+        print 'USAGE:\n\t' + sys.argv[0] + ' folderWithImages train.csv test.csv [trainFiles.csv testFiles.csv]'
         print '\nfolderWithImages name format: folderName_X1xY1xX2xY2, where X1xY1xX2xY2 coordinates of rectangle with hashtag'
         sys.exit(1)
 
     d = DatasetCreator()
     d.directoryProcess(os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[1]) + '_interesting')
     d.saveCSV(sys.argv[2], sys.argv[3])
+    if len(sys.argv) >= 6:
+        d.saveTrainTestImageFilenames(sys.argv[4], sys.argv[5])

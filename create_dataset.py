@@ -1,41 +1,74 @@
 import csv
 import os
-import logging
 import random
+import logging
 
-import numpy as np
+from sklearn.externals.joblib import delayed, Parallel
 
-from process_image import Image
+from process_image import Image, process_single_image
+
+
+def process_n_cut_single_image(filename, tagPosition, negativeMultiplicator=3, positiveImageTemplate=None):
+    positive, negative = process_single_image(filename, tagPosition, positiveImageTemplate)
+
+    # todo: fix multi-threading bug with using same global random object
+    random.shuffle(negative)
+    negativeMAmount = int(len(positive) * negativeMultiplicator)
+    if negativeMAmount < len(negative):
+        negative = negative[:negativeMAmount]
+
+    return filename, positive, negative
 
 
 class DatasetCreator(object):
-    def __init__(self, testPart=0.3, negativeMultiplicator=3, seed=8172635):
+    def __init__(self):
+        self.logger = logging.getLogger("RawFeatureExtractor")
         self.trainDataset = []
         self.testDataset = []
-        self.testPart = testPart
-        self.negativeMultiplicator = negativeMultiplicator
-        self.seed = seed
-        self.rand = random.Random()
-        self.rand.seed(seed)
+        self.trainFilenames = []
+        self.testFilenames = []
 
-    def set_image_folder(self, imageFolder, interestingWindowsFolder=None, YX=True):
-        self.imageFolder = imageFolder
-        self.interestingWindowsFolder = interestingWindowsFolder
+    def _prepareParallelTasks(self, files, tagPosition, negativeMultiplicator, interestingWindowsFolder=None):
+        taskQueue = []
+        for filename in files:
+            if interestingWindowsFolder:
+                name, extension = os.path.splitext(filename)
+                positiveImageTemplate = os.path.join(interestingWindowsFolder, name + '_%d' + extension)
+            else:
+                positiveImageTemplate = None
+
+            taskQueue.append(delayed(process_n_cut_single_image)(filename, tagPosition, negativeMultiplicator, positiveImageTemplate))
+
+        return taskQueue
+
+    def prepareImageProcessing(self, trainFiles, testFiles, tagPosition, negativeMultiplicator=3, interestingWindowsFolder=None):
         if interestingWindowsFolder and not os.path.exists(interestingWindowsFolder):
             os.makedirs(interestingWindowsFolder)
-        self.tagPosition = None
-        tagInformationParts = imageFolder.rsplit('_', 1)
-        if len(tagInformationParts) > 1:
-            tagInformationString = tagInformationParts[1]
-            tagCoords = tagInformationString.split('x')
-            if len(tagCoords) == 4:
-                self.tagPosition = map(int, tagCoords)
-                if YX:
-                    tp = self.tagPosition
-                    self.tagPosition = (tp[1], tp[0], tp[3], tp[2])
 
-        if self.tagPosition is None:
-            raise ValueError("Incorrect folder name format. Folder MUST contain tag position information")
+        self.trainFilenames.extend(trainFiles)
+        self.testFilenames.extend(testFiles)
+
+        self.trainParallelTasks.append(self._prepareParallelTasks(trainFiles, tagPosition, negativeMultiplicator, interestingWindowsFolder))
+        self.testParallelTasks.append(self._prepareParallelTasks(testFiles, tagPosition, negativeMultiplicator, interestingWindowsFolder))
+
+    def _processResult(self, features, dataset):
+        for filename, positive, negative in features:
+            if len(positive) == 0:
+                self.logger.warning('No positive windows were created in image: %s' % (filename,))
+
+            for e in positive:
+                # dataset.append(np.concatenate([e, np.array([1])]))
+                dataset.append(list(e) + [1])
+            for e in negative:
+                # dataset.append(np.concatenate([e, np.array([0])]))
+                dataset.append(list(e) + [0])
+
+    def processPrepared(self, jobs=-1):
+        p = Parallel(n_jobs=jobs, verbose=10, pre_dispatch='3*n_jobs')
+        trainFeatures = p(self.trainParallelTasks)
+        testFeatures = p(self.testParallelTasks)
+        self._processResult(trainFeatures, self.trainDataset)
+        self._processResult(testFeatures, self.testDataset)
 
     def directoryProcess(self, imageFolder, interestingWindowsFolder=None):
         self.set_image_folder(imageFolder, interestingWindowsFolder)
@@ -99,12 +132,12 @@ class DatasetCreator(object):
             writer = csv.writer(f)
             writer.writerows(self.testDataset)
 
-    def saveTrainTestImageFilenames(self, trainImagesFilename, testImagesFilename):
-        with open(trainImagesFilename, 'wb') as f:
+    def saveTrainTestImageFilenames(self, trainImagesFilenames, testImagesFilenames):
+        with open(trainImagesFilenames, 'wb') as f:
             writer = csv.writer(f)
             writer.writerows([(i,) for i in self.trainFiles])
 
-        with open(testImagesFilename, 'wb') as f:
+        with open(testImagesFilenames, 'wb') as f:
             writer = csv.writer(f)
             writer.writerows([(i,) for i in self.testFiles])
 

@@ -1,6 +1,7 @@
 import os
 
 from create_dataset import DatasetCreator
+from process_folder import process_folder
 
 
 def process_base_folder(folder, trainFilename, testFilename, trainImageFilenames=None, testImageFilenames=None, prefix=None, negativeMultiplicator=None):
@@ -9,7 +10,7 @@ def process_base_folder(folder, trainFilename, testFilename, trainImageFilenames
         ff = os.path.join(folder, f)
         if os.path.isdir(ff):
             if not prefix or f.startswith(prefix):
-                fe.directoryProcess(ff)
+                process_folder(ff, datasetCreator=fe)
 
     fe.saveCSV(trainFilename, testFilename)
     if trainImageFilenames and testImageFilenames:

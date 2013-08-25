@@ -69,6 +69,11 @@ class Image(object):
         return self.positiveExamples, self.negativeExamples
 
 
+def process_single_image(filename, tagPosition, positiveImageTemplate=None):
+    image = Image(filename, tagPosition=tagPosition)
+    return image.process(positiveImageTemplate=positiveImageTemplate)
+
+
 if __name__ == '__main__':
     testDATALINEfilename = '5_07000.jpg'
     i = Image(testDATALINEfilename, tagPosition=(437, 488, 453, 581))

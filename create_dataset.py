@@ -72,56 +72,6 @@ class DatasetCreator(object):
         self._processResult(trainFeatures, self.trainDataset)
         self._processResult(testFeatures, self.testDataset)
 
-    def directoryProcess(self, imageFolder, interestingWindowsFolder=None):
-        self.set_image_folder(imageFolder, interestingWindowsFolder)
-
-        logger = logging.getLogger("RawFeatureExtractor")
-        acceptableExtensions = ('jpg', 'jpeg', 'png')
-        appropriateFiles = []
-        for filename in os.listdir(self.imageFolder):
-            if filename.endswith(acceptableExtensions):
-                appropriateFiles.append(filename)
-
-        self.rand.shuffle(appropriateFiles)
-
-        ttSplitIndx = int(len(appropriateFiles) * (1-self.testPart))
-        self.trainFiles = set(appropriateFiles[:ttSplitIndx])
-        self.testFiles = set(appropriateFiles[ttSplitIndx:])
-        appropriateFilesSet = set(appropriateFiles)
-
-        for filename in os.listdir(self.imageFolder):
-            if filename not in appropriateFilesSet:
-                continue
-
-            logger.debug('Processing %s' % (filename,))
-            if self.interestingWindowsFolder:
-                name, extension = os.path.splitext(filename)
-                positiveImageTemplate = os.path.join(self.interestingWindowsFolder, name + '_%d' + extension)
-            else:
-                positiveImageTemplate = None
-
-            image = Image(os.path.join(self.imageFolder, filename), tagPosition=self.tagPosition)
-            positive, negative = image.process(positiveImageTemplate=positiveImageTemplate)
-            if len(positive) == 0:
-                logger.warning('No positive windows were created in image: %s' % (filename,))
-
-            self.rand.shuffle(negative)
-            negativeMAmount = int(len(positive) * self.negativeMultiplicator)
-            if negativeMAmount < len(negative):
-                negative = negative[:negativeMAmount]
-
-            if filename in self.trainFiles:
-                dataset = self.trainDataset
-            else:
-                dataset = self.testDataset
-
-            for e in positive:
-                # dataset.append(np.concatenate([e, np.array([1])]))
-                dataset.append(list(e) + [1])
-            for e in negative:
-                # dataset.append(np.concatenate([e, np.array([0])]))
-                dataset.append(list(e) + [0])
-
     def saveCSV(self, trainFilename, testFilename):
         random.shuffle(self.trainDataset)
         random.shuffle(self.testDataset)

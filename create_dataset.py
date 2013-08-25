@@ -34,7 +34,8 @@ class DatasetCreator(object):
         taskQueue = []
         for filename in files:
             if interestingWindowsFolder:
-                name, extension = os.path.splitext(filename)
+                path, rfilename = os.path.split(filename)
+                name, extension = os.path.splitext(rfilename)
                 positiveImageTemplate = os.path.join(interestingWindowsFolder, name + '_%d' + extension)
             else:
                 positiveImageTemplate = None

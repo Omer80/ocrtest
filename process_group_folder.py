@@ -5,14 +5,14 @@ from create_dataset import DatasetCreator
 from process_folder import process_folder, large_train, small_train
 
 
-def process_base_folder(folder, negativeMultiplicator=3, rulesType='large', jobs=-1, prefix=None):
+def process_base_folder(folder, negativeMultiplicator=3, rulesType='large', jobs=-1, prefix=None, interestingWindowsFolder=None):
     dc = DatasetCreator()
     for f in os.listdir(folder):
         ff = os.path.join(folder, f)
         if os.path.isdir(ff):
             if not prefix or f.startswith(prefix):
                 rules = large_train if rulesType == 'large' else small_train
-                process_folder(ff, rules=rules, negativeMultiplicator=negativeMultiplicator, datasetCreator=dc)
+                process_folder(ff, rules=rules, negativeMultiplicator=negativeMultiplicator, datasetCreator=dc, interestingWindowsFolder=interestingWindowsFolder)
 
     dc.processPrepared(jobs)
     return dc
@@ -31,6 +31,7 @@ def process_arguments():
     parser.add_argument('test', help='Test dataset')
     parser.add_argument('train_files', default=None, help='File with list of images, that included in train set')
     parser.add_argument('test_files', default=None, help='File with list of images, that included in test set')
+    parser.add_argument('-p', '--positive_fragments_folder', default=None, help='Folder to put positive fragments of frames')
     parser.add_argument('-t', '--type', default='large', choices=['large', 'small'], help='Size of train set')
     parser.add_argument('-m', '--negmult', default=3, type=int, help='Negative multiplicator: how more negative examples than positive')
     parser.add_argument('-j', '--jobs', default=-1, type=int, help='Processes amount for feature extraction')
@@ -54,5 +55,5 @@ if __name__ == '__main__':
     #     trnfn, tstfn = None, None
 
     args = process_arguments()
-    dc = process_base_folder(args.folder, negativeMultiplicator=args.negmult, rulesType=args.type, jobs=args.jobs)
+    dc = process_base_folder(args.folder, negativeMultiplicator=args.negmult, rulesType=args.type, jobs=args.jobs, interestingWindowsFolder=args.positive_fragments_folder)
     save_dataset(dc, args.train, args.test, args.train_files, args.test_files)

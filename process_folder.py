@@ -25,7 +25,12 @@ def getTagCoordinates(folder, YX=True):
             tagPosition = map(int, tagCoords)
             if YX:
                 tp = tagPosition
-                tagPosition = (tp[1], tp[0], tp[3], tp[2])
+                tagPosition = [tp[1], tp[0], tp[3], tp[2]]
+            tp = tagPosition
+            if tp[0] > tp[2]:
+                tp[0], tp[2] = tp[2], tp[0]
+            if tp[1] > tp[3]:
+                tp[1], tp[3] = tp[3], tp[1]
 
     if tagPosition is None:
         raise ValueError("Incorrect folder name format. Folder MUST contain tag position information")

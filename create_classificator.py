@@ -47,6 +47,7 @@ if __name__ == '__main__':
     testX, testY = loadDataset(sys.argv[2])
     # test_svc(trainX, trainY, testX, testY)
     # test_bunch_of_classifiers(trainX, trainY, testX, testY)
-    cl = RandomForestClassifier()
+    # cl = RandomForestClassifier()
+    cl = LogisticRegression()
     cl = test_classifier(cl, trainX, trainY, testX, testY)
     joblib.dump(cl, sys.argv[3])

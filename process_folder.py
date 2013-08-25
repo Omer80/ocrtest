@@ -5,7 +5,7 @@ from create_dataset import DatasetCreator
 
 Condition = namedtuple('Condition', ['cond_function', 'train'])
 
-full_train = [
+large_train = [
     Condition(lambda x: x > 0, 0.7)
 ]
 small_train = [
@@ -33,12 +33,12 @@ def getTagCoordinates(folder, YX=True):
     return tagPosition
 
 
-def process_folder(folder, rules=full_train, negativeMultiplicator=3, interestingWindowsFolder=None, datasetCreator=None):
+def process_folder(folder, rules=large_train, negativeMultiplicator=3, interestingWindowsFolder=None, datasetCreator=None):
     files = []
     acceptableExtensions = ('jpg', 'jpeg', 'png')
     for filename in os.listdir(folder):
         if filename.lower().endswith(acceptableExtensions):
-            files.append(filename)
+            files.append(os.path.join(folder, filename))
 
     trainAmount = 0
     for c in rules:

@@ -27,6 +27,8 @@ class DatasetCreator(object):
         self.testDataset = []
         self.trainFilenames = []
         self.testFilenames = []
+        self.trainParallelTasks = []
+        self.testParallelTasks = []
 
     def _prepareParallelTasks(self, files, tagPosition, negativeMultiplicator, interestingWindowsFolder=None):
         taskQueue = []
@@ -48,8 +50,8 @@ class DatasetCreator(object):
         self.trainFilenames.extend(trainFiles)
         self.testFilenames.extend(testFiles)
 
-        self.trainParallelTasks.append(self._prepareParallelTasks(trainFiles, tagPosition, negativeMultiplicator, interestingWindowsFolder))
-        self.testParallelTasks.append(self._prepareParallelTasks(testFiles, tagPosition, negativeMultiplicator, interestingWindowsFolder))
+        self.trainParallelTasks.extend(self._prepareParallelTasks(trainFiles, tagPosition, negativeMultiplicator, interestingWindowsFolder))
+        self.testParallelTasks.extend(self._prepareParallelTasks(testFiles, tagPosition, negativeMultiplicator, interestingWindowsFolder))
 
     def _processResult(self, features, dataset):
         for filename, positive, negative in features:
@@ -64,7 +66,7 @@ class DatasetCreator(object):
                 dataset.append(list(e) + [0])
 
     def processPrepared(self, jobs=-1):
-        p = Parallel(n_jobs=jobs, verbose=10, pre_dispatch='3*n_jobs')
+        p = Parallel(n_jobs=jobs, verbose=100, pre_dispatch='3*n_jobs')
         trainFeatures = p(self.trainParallelTasks)
         testFeatures = p(self.testParallelTasks)
         self._processResult(trainFeatures, self.trainDataset)
@@ -121,8 +123,8 @@ class DatasetCreator(object):
                 dataset.append(list(e) + [0])
 
     def saveCSV(self, trainFilename, testFilename):
-        self.rand.shuffle(self.trainDataset)
-        self.rand.shuffle(self.testDataset)
+        random.shuffle(self.trainDataset)
+        random.shuffle(self.testDataset)
 
         with open(trainFilename, 'wb') as f:
             writer = csv.writer(f)
@@ -135,11 +137,11 @@ class DatasetCreator(object):
     def saveTrainTestImageFilenames(self, trainImagesFilenames, testImagesFilenames):
         with open(trainImagesFilenames, 'wb') as f:
             writer = csv.writer(f)
-            writer.writerows([(i,) for i in self.trainFiles])
+            writer.writerows([(i,) for i in self.trainFilenames])
 
         with open(testImagesFilenames, 'wb') as f:
             writer = csv.writer(f)
-            writer.writerows([(i,) for i in self.testFiles])
+            writer.writerows([(i,) for i in self.testFilenames])
 
 
 if __name__ == '__main__':

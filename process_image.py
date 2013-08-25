@@ -34,8 +34,25 @@ class Image(object):
             t, b = self.tagPosition, self.bounds
             self.tagPosition = (t[0] - b[0].start, t[1] - b[1].start, t[2] - b[0].start, t[3] - b[1].start)
 
+        # extend image to be divisible by window shift
+        imsh = self.image.shape
+        if imsh[0] % self.shiftSize[0] != 0:
+            missingRows = self.shiftSize[0] - (imsh[0] % self.shiftSize[0])
+            self.image = np.vstack([np.reshape(np.zeros(missingRows * imsh[1]), (missingRows, imsh[1])), self.image])
+            t = self.tagPosition
+            self.tagPosition = (t[0] + missingRows, t[1], t[2] + missingRows, t[3])
+
+        imsh = self.image.shape
+        if imsh[1] % self.shiftSize[1] != 0:
+            missingColumns = self.shiftSize[1] - (imsh[1] % self.shiftSize[1])
+            self.image = np.hstack([np.reshape(np.zeros(missingColumns * imsh[0]), (imsh[0], missingColumns)), self.image])
+            t = self.tagPosition
+            self.tagPosition = (t[0], t[1] + missingColumns, t[2], t[3] + missingColumns)
+
     def extractFeatures(self, positiveImageTemplate=None):
         windowSize, shiftSize, tagPosition = self.windowSize, self.shiftSize, self.tagPosition
+        # if positiveImageTemplate is not None:
+        #     imsave(positiveImageTemplate % (-1,), self.image)
 
         # count rows/columns amount
         s = ((np.array(self.image.shape) - np.array(windowSize)) // np.array(shiftSize)) + 1

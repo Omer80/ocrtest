@@ -49,8 +49,8 @@ def processDirectory(classifier, inputFolder, outputFolder=None):
                     b = image.bounds
                     drawRectangle(image.sourceImage, (x + b[0].start - image.missingRows,
                                                       y + b[1].start - image.missingColumns,
-                                                      x+image.windowSize[0] + b[0].start - image.missingRows,
-                                                      y+image.windowSize[1] + b[1].start - image.missingColumns)
+                                                      x+image.windowSize[0]-1 + b[0].start - image.missingRows,
+                                                      y+image.windowSize[1]-1 + b[1].start - image.missingColumns)
                     )
                     if xc == px and yc == py + 1:
                         out = os.path.join(outputFolder, 'positive')

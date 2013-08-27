@@ -9,15 +9,16 @@ def evaluationStep(evaluable, params):
 
 class ParallelParticleSwarmOptimizer(ParticleSwarmOptimizer):
     def __init__(self, jobs=-1, *kvargs, **kwargs):
-        self.pool = Parallel(n_jobs=jobs, verbose=100, pre_dispatch='3*n_jobs')
+        self.pool = Parallel(n_jobs=jobs, verbose=1, pre_dispatch='3*n_jobs')
         super(ParallelParticleSwarmOptimizer, self).__init__(*kvargs, **kwargs)
 
-    def setEvaluator(self, evaluator, initEvaluable = None):
+    def setEvaluator(self, evaluator, initEvaluable=None):
         self.evaluatorCopy = evaluator
         super(ParallelParticleSwarmOptimizer, self).setEvaluator(evaluator, initEvaluable)
 
     def _learnStep(self):
-        evaluationTasks = [delayed(evaluationStep)(self.evaluatorCopy, particle.position.copy()) for particle in self.particles]
+        ec = self.evaluatorCopy
+        evaluationTasks = [delayed(evaluationStep)(ec, particle.position.copy()) for particle in self.particles]
         particleFitnesses = self.pool(evaluationTasks)
         for particle, fit in zip(self.particles, particleFitnesses):
             self.numEvaluations += 1

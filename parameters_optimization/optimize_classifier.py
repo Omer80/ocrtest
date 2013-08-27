@@ -15,6 +15,7 @@ except ImportError:
 
 from utils import loadDataset, saveClassifiersEvaluations
 from parameters_optimization.classifier_evaluation import ClassifierEvaluation
+from parameters_optimization.parallel_pso import ParallelParticleSwarmOptimizer
 
 
 class Evaluator(object):
@@ -144,7 +145,7 @@ class MetaOptimizer(object):
 
         co = Evaluator(mutable_parameters, immutable_parameters, self.pso_parameters_restrictions, self.classifierFactory, self.trainData, self.trainLabel)
         x0 = np.array([0] * len(mutable_parameters))
-        psoo = optimization.ParticleSwarmOptimizer(co, x0, boundaries=[(0, 1)] * len(mutable_parameters), size=5)
+        psoo = ParallelParticleSwarmOptimizer(self.jobs, co, x0, boundaries=[(0, 1)] * len(mutable_parameters), size=5)
         psoo.maxEvaluations = self.iterations
         psoo.particles = []
         for _ in xrange(psoo.size):

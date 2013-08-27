@@ -36,6 +36,7 @@ class Image(object):
 
         # extend image to be divisible by window shift
         imsh = self.image.shape
+        self.missingRows = 0
         if imsh[0] % self.shiftSize[0] != 0:
             missingRows = self.shiftSize[0] - (imsh[0] % self.shiftSize[0])
             self.image = np.vstack([np.reshape(np.zeros(missingRows * imsh[1]), (missingRows, imsh[1])), self.image])
@@ -45,6 +46,7 @@ class Image(object):
                 self.tagPosition = (t[0] + missingRows, t[1], t[2] + missingRows, t[3])
 
         imsh = self.image.shape
+        self.missingColumns = 0
         if imsh[1] % self.shiftSize[1] != 0:
             missingColumns = self.shiftSize[1] - (imsh[1] % self.shiftSize[1])
             self.image = np.hstack([np.reshape(np.zeros(missingColumns * imsh[0]), (imsh[0], missingColumns)), self.image])

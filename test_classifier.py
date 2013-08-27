@@ -24,8 +24,10 @@ def processDirectory(classifier, inputFolder, outputFolder=None):
     logger = logging.getLogger("TestClassifier")
     acceptableExtensions = ('jpg', 'jpeg', 'png')
     try:
-        shutil.rmtree(os.path.join(outputFolder, 'positive'))
-        shutil.rmtree(os.path.join(outputFolder, 'negative'))
+        if os.path.exists(os.path.join(outputFolder, 'positive')):
+            shutil.rmtree(os.path.join(outputFolder, 'positive'))
+        if os.path.exists(os.path.join(outputFolder, 'negative')):
+            shutil.rmtree(os.path.join(outputFolder, 'negative'))
         os.makedirs(os.path.join(outputFolder, 'positive'))
         os.makedirs(os.path.join(outputFolder, 'negative'))
     except OSError:

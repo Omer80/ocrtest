@@ -39,6 +39,7 @@ class Image(object):
         if imsh[0] % self.shiftSize[0] != 0:
             missingRows = self.shiftSize[0] - (imsh[0] % self.shiftSize[0])
             self.image = np.vstack([np.reshape(np.zeros(missingRows * imsh[1]), (missingRows, imsh[1])), self.image])
+            self.missingRows = missingRows
             if self.tagPosition:
                 t = self.tagPosition
                 self.tagPosition = (t[0] + missingRows, t[1], t[2] + missingRows, t[3])
@@ -47,6 +48,7 @@ class Image(object):
         if imsh[1] % self.shiftSize[1] != 0:
             missingColumns = self.shiftSize[1] - (imsh[1] % self.shiftSize[1])
             self.image = np.hstack([np.reshape(np.zeros(missingColumns * imsh[0]), (imsh[0], missingColumns)), self.image])
+            self.missingColumns = missingColumns
             if self.tagPosition:
                 t = self.tagPosition
                 self.tagPosition = (t[0], t[1] + missingColumns, t[2], t[3] + missingColumns)

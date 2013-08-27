@@ -28,6 +28,10 @@ def processDirectory(classifier, inputFolder, outputFolder=None):
             shutil.rmtree(os.path.join(outputFolder, 'positive'))
         if os.path.exists(os.path.join(outputFolder, 'negative')):
             shutil.rmtree(os.path.join(outputFolder, 'negative'))
+    except OSError:
+        pass
+
+    try:
         os.makedirs(os.path.join(outputFolder, 'positive'))
         os.makedirs(os.path.join(outputFolder, 'negative'))
     except OSError:
@@ -67,4 +71,5 @@ if __name__ == '__main__':
         sys.exit(1)
 
     classifier = joblib.load(sys.argv[1])
+    classifier.set_params(n_jobs=1)
     processDirectory(classifier, sys.argv[2], sys.argv[3])

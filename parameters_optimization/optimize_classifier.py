@@ -1,4 +1,5 @@
 import argparse
+import csv
 import logging
 
 import numpy as np
@@ -85,6 +86,7 @@ class MetaOptimizer(object):
         parser.add_argument('train', help='Train dataset')
         parser.add_argument('test', help='Test dataset')
         parser.add_argument('model', help='File to save best model')
+        parser.add_argument('scores', default=None, help='File to save scores of tested models')
         parser.add_argument('-t', '--type', default='grid', choices=['grid', 'random', 'pso'], help='Search type')
         parser.add_argument('-i', '--iterations', default=self.iterations, type=int, help='Iterations amount for pso and random search')
         parser.add_argument('-j', '--jobs', default=-1, type=int, help='Processes amount for learning')
@@ -94,9 +96,9 @@ class MetaOptimizer(object):
         trainData, trainLabel = loadDataset(args.train)
         testData, testLabel = loadDataset(args.test)
 
-        self.initialize_optimizer(args.type, args.model, trainData, trainLabel, testData, testLabel, args.jobs, args.iterations)
+        self.initialize_optimizer(args.type, args.model, trainData, trainLabel, testData, testLabel, args.jobs, args.iterations, args.scores)
 
-    def initialize_optimizer(self, optimizationMethod, modelFilename, trainData, trainLabel, testData, testLabel, jobs, iterations=None):
+    def initialize_optimizer(self, optimizationMethod, modelFilename, trainData, trainLabel, testData, testLabel, jobs, iterations=None, scoresCsvFilename=None):
         self.optimizationMethod = optimizationMethod
         self.modelFilename = modelFilename
         self.trainData, self.trainLabel = trainData, trainLabel
@@ -104,6 +106,7 @@ class MetaOptimizer(object):
         self.jobs = jobs
         if iterations is not None:
             self.iterations = iterations
+        self.scoresCsvFilename = scoresCsvFilename
 
         optimizationAlgorithms = {
             'grid': self.grid_search,
@@ -158,11 +161,16 @@ class MetaOptimizer(object):
 
         return co
 
-    def log_optimized_info(self, optimized):
-        self.logger.info("Best parameters set found on development set: %s", (optimized.best_estimator_,))
-        self.logger.info("Grid scores on development set:")
-        for params, mean_score, scores in optimized.grid_scores_:
-            self.logger.info("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() / 2, params))
+    def log_optimized_info(self, optimized, csvScoresFilename=None):
+        print("Best parameters set found on development set: %s", (optimized.best_estimator_,))
+        print("Grid scores on development set:")
+        sortedScores = sorted([(mean_score, scores.std() / 2, params, scores) for params, mean_score, scores in optimized.grid_scores_], reverse=True)
+        for mean_score, std, params, scores in sortedScores:
+            print("%0.3f (+/-%0.03f) for %r with %s" % (mean_score, std, params, scores))
+        if csvScoresFilename is not None:
+            with open(csvScoresFilename, 'wb') as f:
+                writer = csv.writer(f)
+                writer.writerows(sortedScores)
 
     def test_classifier(self, clf):
         testPredicted = clf.predict(self.testData)
@@ -198,7 +206,7 @@ class MetaOptimizer(object):
 
     def run(self):
         self.optimized = self.algorithm()
-        self.log_optimized_info(self.optimized)
+        self.log_optimized_info(self.optimized, self.scoresCsvFilename)
 
         clf = self.optimized.best_estimator_
         evaluation = self.test_classifier(clf)

@@ -14,7 +14,7 @@ class RandomForestMetaOptimizer(MetaOptimizer):
     }
 
     randomized_parameters = {
-        'n_estimators': [20],
+        'n_estimators': [30],
         'bootstrap': [True]*3 +[False],
         'criterion': ['gini']*2 + ['entropy'],
         'max_features': ['sqrt']*3 + ['log2', None],

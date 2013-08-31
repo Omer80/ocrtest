@@ -17,7 +17,8 @@ class SVCRbfMetaOptimizer(MetaOptimizer):
         'C': scipy.stats.expon(scale=100),
         'gamma': scipy.stats.expon(scale=.1),
         'kernel': ['rbf'],
-        'class_weight': ['auto', None]
+        'class_weight': ['auto', None],
+        'shrinking': [True]*3 + [False],
     }
     iterations = 20
 

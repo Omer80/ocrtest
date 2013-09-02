@@ -26,7 +26,7 @@ if __name__ == '__main__':
     for p in params:
         print p
         rfc = RandomForestClassifier(**p)
-        rfc.set_parms(n_estimators=500, n_jobs=-1)
+        rfc.set_params(n_estimators=500, n_jobs=-1)
         rfc.fit(trainData, trainLabel)
         testPredicted = rfc.predict(testData)
 

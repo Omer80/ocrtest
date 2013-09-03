@@ -10,26 +10,10 @@ from skimage.io import imsave
 from skimage.color import rgb2gray
 from skimage.transform import resize
 from process_image import Image
-
+from file_helper import FileHelper
 
 
 class ImagesPreparationTool:
-
-
-    def __read_images_in_dir(self, dir, load_pattern = '.png:.jpg:.jpeg:.gif'):
-        load_pattern = load_pattern.split(':')
-        matches = []
-        for root, dirnames, filenames in os.walk(dir):
-            for filename in filenames:
-                # if filename.endswith(('.jpg', '.jpeg', '.gif', '.png')):
-                if filename.endswith(tuple(load_pattern)):
-                    matches.append(filename)
-
-        # return sorted(matches, key=lambda item: (int(item.partition(' ')[0])
-        #                            if item[0].isdigit() else float('inf'), item))
-
-        return matches
-
 
     def __slice_image_to_small_images(self, image, filename = 'image_%04d.jpg', h_size = 3, v_size = 3):
         i = 0
@@ -58,7 +42,7 @@ class ImagesPreparationTool:
         # A = np.arange(120).reshape((10, 12))
         # print A
         # slice_image_to_small_images(A, out_dir+'image_%04d.jpg')
-        image_files = self.__read_images_in_dir(dir_in)
+        image_files = FileHelper.read_images_in_dir(dir_in)
         i = 0
         for filename in image_files:
             print filename.split('.')[0] + '_%04d.jpg'
@@ -70,7 +54,7 @@ class ImagesPreparationTool:
             self.__slice_image_to_small_images(im.image, os.path.join(dir_out, filename.split('.')[0] + '_%04d.jpg'), h_size, v_size)
 
     def resize_images(self, dir_in, dir_out, h_size, v_size, make_grey = True):
-        image_files = self.__read_images_in_dir(dir_in)
+        image_files = FileHelper.read_images_in_dir(dir_in)
         i = 0
         for filename in image_files:
             print filename.split('.')[0] + '_%04d.jpg'
@@ -85,8 +69,8 @@ class ImagesPreparationTool:
         return ','.join("{0}".format(item) for item in im.ravel())+','+str(classification_value)
 
     def images_to_csv_file(self, dir_positive, dir_negative, filename_positive = 'positive.csv', filename_negative = 'negative.csv'):
-        positive_images = self.__read_images_in_dir(dir_positive)
-        negative_images = self.__read_images_in_dir(dir_negative)
+        positive_images = FileHelper.read_images_in_dir(dir_positive)
+        negative_images = FileHelper.read_images_in_dir(dir_negative)
         if (len(negative_images) > len(positive_images) * 3 ):
             negative_images = negative_images[:len(positive_images)* 3]
             # print "cut negative images"

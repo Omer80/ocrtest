@@ -3,16 +3,7 @@ __author__ = 'Roman Podlinov'
 import os
 import logging
 import sys
-
-def remove_files_in_dir(path):
-    if (path == '/' or path == "\\"):
-        return
-    else:
-        for root, dirs, files in os.walk(path, topdown=False):
-            for name in files:
-                os.remove(os.path.join(root, name))
-            for name in dirs:
-                os.rmdir(os.path.join(root, name))
+from file_helper import FileHelper
 
 
 def cut_frames_from_video(path, videofile):
@@ -24,7 +15,7 @@ def cut_frames_from_video(path, videofile):
     parts = videofile.split('.')
     frames_path = os.path.join(path, parts[0])
     if os.path.exists(frames_path):
-        os.remove_files_in_dir(frames_path)
+        FileHelper.remove_files_in_dir(frames_path)
     else:
         os.mkdir(frames_path)
 

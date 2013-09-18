@@ -11,7 +11,7 @@ from file_helper import FileHelper
 
 
 class SIFTComparer:
-    MIN_MATCH_COUNT = 2
+    MIN_MATCH_COUNT = 3
 
     def __init__(self, templates_dir, images_dir, results_dir = './results'):
         self.templates_dir = templates_dir
@@ -67,8 +67,8 @@ class SIFTComparer:
 
             if len(kp_pairs) >= self.MIN_MATCH_COUNT:
                 img1 = cv2.imread(os.path.join(self.templates_dir, name), cv2.IMREAD_GRAYSCALE)
-                self.draw_matches('find_obj', kp_pairs, img1, image)
-                # print name
+                self.draw_matches(name, kp_pairs, img1, image)
+                print name
             else:
                 logging.debug("Not enough matches are found - %d/%d" % (len(kp_pairs), self.MIN_MATCH_COUNT))
 
@@ -160,7 +160,9 @@ if __name__ == '__main__':
 
 
     obj = SIFTComparer('../logos', '../in')
-    img1 = cv2.imread('../in/784_00493.jpg', cv2.IMREAD_GRAYSCALE)
+    # img1 = cv2.imread('../in/784_00493.jpg', cv2.IMREAD_GRAYSCALE)
+    # img1 = cv2.imread('../in/clip0a28ae_00004.jpg', cv2.IMREAD_GRAYSCALE)
+    img1 = cv2.imread('../in/Pic21.png', cv2.IMREAD_GRAYSCALE)
     # img2 = cv2.imread(dir_images, 0)
 
     obj.compareImageWithTemplates(img1)

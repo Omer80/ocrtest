@@ -25,13 +25,14 @@ class SIFTComparer:
             logging.error("Invalid path: {0}".format(images_dir))
             sys.exit(1)
 
-        # try:
-        if os.path.exists(results_dir):
-            FileHelper.remove_files_in_dir(results_dir)
-        else:
-            os.makedirs(results_dir)
-        # except OSError:
-        #     pass
+        FileHelper.create_or_clear_dir(results_dir)
+        # # try:
+        # if os.path.exists(results_dir):
+        #     FileHelper.remove_files_in_dir(results_dir)
+        # else:
+        #     os.makedirs(results_dir)
+        # # except OSError:
+        # #     pass
 
 
         self.detector = cv2.SIFT(3200)

@@ -1,4 +1,6 @@
 # coding=utf-8
+import shutil
+
 __author__ = 'Roman Podlinov'
 
 import os
@@ -14,7 +16,7 @@ class FileHelper:
                 for name in files:
                     os.remove(os.path.join(root, name))
                 for name in dirs:
-                    os.rmdir(os.path.join(root, name))
+                    shutil.rmtree(os.path.join(root, name))
 
     @staticmethod
     def read_images_in_dir(dir, load_pattern='.png:.jpg:.jpeg:.gif'):
@@ -30,3 +32,10 @@ class FileHelper:
         #                            if item[0].isdigit() else float('inf'), item))
 
         return matches
+
+    @staticmethod
+    def create_or_clear_dir(dir):
+        if os.path.exists(dir):
+            FileHelper.remove_files_in_dir(dir)
+        else:
+            os.makedirs(dir)

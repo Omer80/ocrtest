@@ -6,7 +6,7 @@ from sklearn.svm import SVC, NuSVC
 from sklearn import metrics
 from sklearn.externals import joblib
 
-from utils import loadDataset
+from ocr_utils import loadDataset
 
 
 def test_classifier(classifier, trainData, trainLabel, testData, testLabel):

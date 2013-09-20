@@ -96,8 +96,8 @@ class DatasetCreator(object):
 
 
 if __name__ == '__main__':
-    import utils
-    utils.init_console_logging()
+    import ocr_utils
+    ocr_utils.init_console_logging()
 
     import sys
     if len(sys.argv) < 4:

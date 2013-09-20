@@ -7,7 +7,7 @@ from sklearn.externals import joblib
 from sklearn.grid_search import GridSearchCV, RandomizedSearchCV
 from sklearn.svm import SVC, NuSVC
 
-from utils import loadDataset
+from ocr_utils import loadDataset
 
 
 class COptimization(object):

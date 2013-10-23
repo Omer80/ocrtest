@@ -14,7 +14,7 @@ except ImportError:
     optimization = None
     Particle = None
 
-from utils import loadDataset, saveClassifiersEvaluations
+from ocr_utils import loadDataset, saveClassifiersEvaluations
 from parameters_optimization.classifier_evaluation import ClassifierEvaluation
 from parameters_optimization.parallel_pso import ParallelParticleSwarmOptimizer
 
@@ -211,7 +211,8 @@ class MetaOptimizer(object):
         clf = self.optimized.best_estimator_
         evaluation = self.test_classifier(clf)
 
-        joblib.dump(clf, self.modelFilename)
+        if self.modelFilename:
+            joblib.dump(clf, self.modelFilename)
         return evaluation
 
     def save_best_classifier_evaluation(self, filename, append=False):

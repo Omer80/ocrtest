@@ -1,7 +1,7 @@
 import ast
 import csv
-from sklearn import metrics
 
+from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 
 from ocr_utils import loadDataset

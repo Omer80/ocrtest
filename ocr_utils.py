@@ -1,8 +1,10 @@
 import csv
-import logging
 import ast
+import logging
 
 import numpy as np
+import joblib
+
 from parameters_optimization.classifier_evaluation import ClassifierEvaluation
 
 
@@ -10,7 +12,7 @@ def init_console_logging(level=logging.DEBUG):
     logging.basicConfig(level=level)
 
 
-def loadDataset(filename):
+def loadCSVDataset(filename):
     with open(filename, 'rb') as f:
         reader = csv.reader(f)
         data, label = [], []
@@ -19,6 +21,19 @@ def loadDataset(filename):
             label.append(int(line[-1]))
 
     return np.array(data), np.array(label)
+
+
+def loadNumPyDataset(filename):
+    return joblib.load(filename)
+
+
+def loadDataset(filename):
+    if filename.endswith('.csv'):
+        return loadCSVDataset(filename)
+    elif filename.endswith('.pkl'):
+        return loadNumPyDataset(filename)
+    else:
+        return loadCSVDataset(filename)
 
 
 def saveClassifiersEvaluations(filename, evaluations, append=False):

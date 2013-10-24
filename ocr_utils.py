@@ -3,7 +3,7 @@ import ast
 import logging
 
 import numpy as np
-import joblib
+from sklearn.externals import joblib
 
 from parameters_optimization.classifier_evaluation import ClassifierEvaluation
 

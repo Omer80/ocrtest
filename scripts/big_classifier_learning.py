@@ -4,7 +4,7 @@ from sklearn import metrics
 
 from sklearn.ensemble import RandomForestClassifier
 
-from utils import loadDataset
+from ocr_utils import loadDataset
 
 
 def loadParametersGrid(filename):

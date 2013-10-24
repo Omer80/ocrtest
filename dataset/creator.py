@@ -3,8 +3,8 @@ import os
 import random
 import logging
 
-from joblib import delayed, Parallel
-import joblib
+from sklearn.externals import joblib
+from sklearn.externals.joblib import delayed, Parallel
 
 from image.processing import process_single_image
 

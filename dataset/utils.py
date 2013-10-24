@@ -1,7 +1,7 @@
 import csv
 
 import numpy as np
-import joblib
+from sklearn.externals import joblib
 
 
 def loadCSVDataset(filename):

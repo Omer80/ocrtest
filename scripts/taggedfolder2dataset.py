@@ -17,7 +17,6 @@ def process_arguments():
     parser.add_argument('-o', '--dataset-type', dest='dataset_type', default='pkl', choices=['pkl', 'csv'], help='Type of dataset output')
     parser.add_argument('--only-first-symbol', dest='first_symbol_tag', action='store_true', help='Positive only on first symbol from tag')
     parser.set_defaults(first_symbol_tag=False)
-    # todo: process 'only first symbol' parameter
 
     return parser.parse_args()
 

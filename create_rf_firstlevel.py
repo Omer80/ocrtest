@@ -27,14 +27,18 @@ def prepareDatasetWeights(trainY):
 if __name__ == '__main__':
     import sys
     if len(sys.argv) < 4:
-        print 'USAGE:\n\t' + sys.argv[0] + ' train.csv test.csv classifier.pkl'
+        print 'USAGE:\n\t' + sys.argv[0] + ' train.csv test.csv classifier.pkl [estimatorsCount=30]'
         sys.exit(1)
+
+    n_estimators = 30
+    if len(sys.argv) >= 5:
+        n_estimators = int(sys.argv[4])
 
     trainX, trainY = loadDataset(sys.argv[1])
     testX, testY = loadDataset(sys.argv[2])
     # test_svc(trainX, trainY, testX, testY)
     # test_bunch_of_classifiers(trainX, trainY, testX, testY)
-    cl = RandomForestClassifier(**{'n_estimators': 100, 'n_jobs': -1, 'bootstrap': False, 'min_samples_leaf': 1, 'max_features': 'sqrt', 'criterion': 'gini', 'min_samples_split': 2, 'max_depth': None})
+    cl = RandomForestClassifier(**{'n_estimators': n_estimators, 'n_jobs': -1, 'bootstrap': False, 'min_samples_leaf': 1, 'max_features': 'sqrt', 'criterion': 'gini', 'min_samples_split': 2, 'max_depth': None})
     # cl = LogisticRegression()
     weights = prepareDatasetWeights(trainY)
     cl = test_classifier(cl, trainX, trainY, testX, testY, weights)

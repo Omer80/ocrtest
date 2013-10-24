@@ -20,7 +20,7 @@ def test_classifier(classifier, trainData, trainLabel, testData, testLabel, weig
 
 
 def prepareDatasetWeights(trainY, positiveWeight=3):
-    weights = np.array(trainY) * 4
+    weights = np.array(trainY) * (positiveWeight - 1)
     weights += 1
     return weights
 
@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     positiveWeight = 3
     if len(sys.argv) >= 6:
-        positiveWeight = int(sys.argv[5]) - 1
+        positiveWeight = int(sys.argv[5])
 
     trainX, trainY = loadDataset(sys.argv[1])
     testX, testY = loadDataset(sys.argv[2])

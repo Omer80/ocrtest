@@ -28,7 +28,11 @@ class Image(object):
         self.sourceImage = rgb2gray(imread(self.imagePath))
         # remove black borders from image
         iim = self.sourceImage > 0
-        self.bounds = ndimage.find_objects(iim)[0]
+        imageObjects = ndimage.find_objects(iim)
+        if imageObjects is not None and len(imageObjects) > 0:
+            self.bounds = imageObjects[0]
+        else:
+            self.bounds = [(0, self.sourceImage.shape[0]), (0, self.sourceImage.shape[1])]
         self.image = self.sourceImage[self.bounds[0], self.bounds[1]]
         # get new tag position after cutting the image
         if self.tagPosition:

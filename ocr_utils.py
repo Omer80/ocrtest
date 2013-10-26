@@ -1,11 +1,20 @@
+import sys
 import csv
 import ast
 import logging
+import argparse
 
 import numpy as np
 from sklearn.externals import joblib
 
 from parameters_optimization.classifier_evaluation import ClassifierEvaluation
+
+
+class ArgParserWithDefaultHelp(argparse.ArgumentParser):
+    def error(self, message):
+        sys.stderr.write('Error: %s\n' % message)
+        self.print_help()
+        sys.exit(2)
 
 
 def init_console_logging(level=logging.DEBUG):

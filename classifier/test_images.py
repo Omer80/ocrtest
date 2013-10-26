@@ -30,11 +30,10 @@ def process_folder(classifier, inputFolder, countPositive, outputFolder=None):
         _, windows = image.process()
         result = classifier.predict(windows)
 
-        # px, py = -1, -1
+        px, py = -1, -1
         isPositive = False
         for i, (w, r) in enumerate(zip(windows, result)):
             if r:
-                isPositive = True
                 if outputFolder:
                     xc = (i / image.windowsAmountInfo[1])
                     yc = (i % image.windowsAmountInfo[1])
@@ -47,9 +46,9 @@ def process_folder(classifier, inputFolder, countPositive, outputFolder=None):
                                                       y+image.windowSize[1]-1 + b[1].start - image.missingColumns)
                     )
 
-                # if xc == px and yc == py + 1:
-                #     out = os.path.join(outputFolder, 'positive')
-                # px, py = xc, yc
+                if xc == px and yc == py + 1:
+                    isPositive = True
+                px, py = xc, yc
 
         logger.debug('Processed %s (%s)' % (filename, 'positive' if isPositive else 'negative'))
         if isPositive == countPositive:

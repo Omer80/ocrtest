@@ -75,8 +75,10 @@ def process_sample(classifier, inputFolder, outputFolder=None):
 
     logger.debug('Process positive examples')
     truePositive, falseNegative = process_folder(classifier, positiveInput, False, falseNegativeOutput)
+    logger.info('True positives: %d; False negatives: %d' % (truePositive, falseNegative))
     logger.debug('Process negative examples')
     trueNegative, falsePositive = process_folder(classifier, negativeInput, True, falsePositiveOutput)
+    logger.info('False positives: %d; True negatives: %d' % (falsePositive, trueNegative))
 
     return truePositive, falseNegative, trueNegative, falsePositive
 

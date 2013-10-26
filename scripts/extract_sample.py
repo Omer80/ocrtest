@@ -51,7 +51,7 @@ def process_folder_group(folder, output, saveStructure=False, rules=default_samp
     FileHelper.create_or_clear_dir(output)
     for d in os.listdir(folder):
         if os.path.isdir(os.path.join(folder, d)):
-            files = process_folder(os.path.join(folder, d))
+            files = process_folder(os.path.join(folder, d), rules)
             if saveStructure:
                 copyto = os.path.join(output, d)
                 os.makedirs(copyto)

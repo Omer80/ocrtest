@@ -44,6 +44,10 @@ if __name__ == '__main__':
     # test_bunch_of_classifiers(trainX, trainY, testX, testY)
     cl = RandomForestClassifier(**{'n_estimators': n_estimators, 'n_jobs': -1, 'bootstrap': False, 'min_samples_leaf': 1, 'max_features': 'sqrt', 'criterion': 'gini', 'min_samples_split': 2, 'max_depth': None})
     # cl = LogisticRegression()
-    weights = prepareDatasetWeights(trainY, positiveWeight)
+    if positiveWeight > 1:
+        weights = prepareDatasetWeights(trainY, positiveWeight)
+    else:
+        weights = None
+
     cl = test_classifier(cl, trainX, trainY, testX, testY, weights)
     joblib.dump(cl, sys.argv[3])

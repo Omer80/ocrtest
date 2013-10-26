@@ -13,20 +13,27 @@ from ocr_utils import ArgParserWithDefaultHelp
 
 Condition = namedtuple('Condition', ['cond_function', 'train'])
 
-small_sample = [
+middle_sample = [
     Condition(lambda x: x <= 10, 0.99),
     Condition(lambda x: x < 100, 10),
     Condition(lambda x: x >= 100, 15)
 ]
 
-extra_small_sample = [
+small_sample = [
     Condition(lambda x: x <= 4, 0.99),
     Condition(lambda x: x <= 10, 3),
     Condition(lambda x: x < 100, 5),
     Condition(lambda x: x >= 100, 7)
 ]
 
-default_sample = small_sample
+extra_small_sample = [
+    Condition(lambda x: x <= 3, 0.99),
+    Condition(lambda x: x <= 10, 3),
+    Condition(lambda x: x < 100, 4),
+    Condition(lambda x: x >= 100, 5)
+]
+
+default_sample = middle_sample
 
 def get_ruled_files(files, rules):
     trainAmount = 0
@@ -66,7 +73,7 @@ def process_arguments():
     parser = ArgParserWithDefaultHelp(description='Extract frames sample tool from several folders')
     parser.add_argument('folder', help='Folder, that contains folders with frames')
     parser.add_argument('output', help='Folder, to copy selected frames')
-    parser.add_argument('-s', '--size', dest='size', default='small', choices=['small', 'extrasmall'], help='Size of sample')
+    parser.add_argument('-s', '--size', dest='size', default='middle', choices=['middle', 'small', 'extrasmall'], help='Size of sample')
     parser.add_argument('--save-structure', dest='saveStructure', action='store_true', help='Save folder structure in output folder')
     parser.set_defaults(saveStructure=False)
 
@@ -77,6 +84,9 @@ if __name__ == '__main__':
     args = process_arguments()
     if args.size == 'extrasmall':
         rules = extra_small_sample
-    else:
+    elif args.size == 'small':
         rules = small_sample
+    else:
+        rules = middle_sample
+
     process_folder_group(args.folder, args.output, args.saveStructure, rules)

@@ -21,35 +21,42 @@ def drawRectangle(image, rec):
     image[rr, cc] = 1
 
 
+def process_image(classifier, image, drawPositiveWindows=False):
+    _, windows = image.process()
+    result = classifier.predict(windows)
+
+    px, py = -1, -1
+    isPositive = False
+    for i, (w, r) in enumerate(zip(windows, result)):
+        if r:
+            xc = (i / image.windowsAmountInfo[1])
+            yc = (i % image.windowsAmountInfo[1])
+            if drawPositiveWindows:
+                x = xc * image.shiftSize[0]
+                y = yc * image.shiftSize[1]
+                b = image.bounds
+                drawRectangle(image.sourceImage, (x + b[0].start - image.missingRows,
+                                                  y + b[1].start - image.missingColumns,
+                                                  x+image.windowSize[0]-1 + b[0].start - image.missingRows,
+                                                  y+image.windowSize[1]-1 + b[1].start - image.missingColumns)
+                )
+
+            if xc == px and yc == py + 1:
+                isPositive = True
+            px, py = xc, yc
+
+    return isPositive
+
+
 def process_folder(classifier, inputFolder, countPositive, outputFolder=None):
     logger = logging.getLogger("TestClassifier")
     total, amount = 0, 0
     for filename in FileHelper.read_images_in_dir(inputFolder):
         total += 1
         logger.debug('Processing %s' % (filename,))
+
         image = Image(os.path.join(inputFolder, filename))
-        _, windows = image.process()
-        result = classifier.predict(windows)
-
-        px, py = -1, -1
-        isPositive = False
-        for i, (w, r) in enumerate(zip(windows, result)):
-            if r:
-                xc = (i / image.windowsAmountInfo[1])
-                yc = (i % image.windowsAmountInfo[1])
-                if outputFolder:
-                    x = xc * image.shiftSize[0]
-                    y = yc * image.shiftSize[1]
-                    b = image.bounds
-                    drawRectangle(image.sourceImage, (x + b[0].start - image.missingRows,
-                                                      y + b[1].start - image.missingColumns,
-                                                      x+image.windowSize[0]-1 + b[0].start - image.missingRows,
-                                                      y+image.windowSize[1]-1 + b[1].start - image.missingColumns)
-                    )
-
-                if xc == px and yc == py + 1:
-                    isPositive = True
-                px, py = xc, yc
+        isPositive = process_image(classifier, image, outputFolder is not None)
 
         logger.debug('Processed %s (%s)' % (filename, 'positive' if isPositive else 'negative'))
         if isPositive == countPositive:

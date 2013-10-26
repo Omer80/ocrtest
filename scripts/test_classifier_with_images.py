@@ -23,8 +23,14 @@ if __name__ == '__main__':
     truePositive, falseNegative, trueNegative, falsePositive = \
         test_images.process_sample(classifier, args.folder, args.output)
 
-    recall = truePositive / float(truePositive + falseNegative)
-    precision = truePositive / float(truePositive + falsePositive)
+    if truePositive + falseNegative > 0:
+        recall = truePositive / float(truePositive + falseNegative)
+    else:
+        recall = 0
+    if truePositive + falsePositive > 0:
+        precision = truePositive / float(truePositive + falsePositive)
+    else:
+        precision = 0
 
     balanced_f1score = 2 * ((precision * recall) / (precision + recall))
 

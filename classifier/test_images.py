@@ -26,7 +26,7 @@ def process_folder(classifier, inputFolder, countPositive, outputFolder=None):
     total, amount = 0, 0
     for filename in FileHelper.read_images_in_dir(inputFolder):
         total += 1
-        logger.debug('Processing %s' % (filename,s))
+        logger.debug('Processing %s' % (filename,))
         image = Image(os.path.join(inputFolder, filename))
         _, windows = image.process()
         result = classifier.predict(windows)

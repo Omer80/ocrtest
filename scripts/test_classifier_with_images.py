@@ -32,7 +32,10 @@ if __name__ == '__main__':
     else:
         precision = 0
 
-    balanced_f1score = 2 * ((precision * recall) / (precision + recall))
+    if precision + recall > 0:
+        balanced_f1score = 2 * ((precision * recall) / (precision + recall))
+    else:
+        balanced_f1score = 0
 
     print 'tp: ', truePositive, ' fp: ', falsePositive
     print 'fn: ', falseNegative, ' tn: ', trueNegative

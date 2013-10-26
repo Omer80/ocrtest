@@ -34,9 +34,9 @@ def process_folder(classifier, inputFolder, countPositive, outputFolder=None):
         isPositive = False
         for i, (w, r) in enumerate(zip(windows, result)):
             if r:
+                xc = (i / image.windowsAmountInfo[1])
+                yc = (i % image.windowsAmountInfo[1])
                 if outputFolder:
-                    xc = (i / image.windowsAmountInfo[1])
-                    yc = (i % image.windowsAmountInfo[1])
                     x = xc * image.shiftSize[0]
                     y = yc * image.shiftSize[1]
                     b = image.bounds

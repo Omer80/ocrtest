@@ -12,8 +12,13 @@ from image.window import sliding_window
 
 
 class Image(object):
-    def __init__(self, imagePath, windowSize=(64, 64), shiftSize=(32, 32), tagPosition=None):
-        self.imagePath = imagePath
+    def __init__(self, image, windowSize=(64, 64), shiftSize=(32, 32), tagPosition=None):
+        if isinstance(image, basestring):
+            self.imagePath = image
+            self.rawImage = None
+        else:
+            self.rawImage = image
+
         self.windowSize = windowSize
         self.shiftSize = shiftSize
 
@@ -26,7 +31,9 @@ class Image(object):
         self.finalWindowResolution = (32, 32)
 
     def prepare(self):
-        self.sourceImage = rgb2gray(imread(self.imagePath))
+        if self.rawImage is None:
+            self.rawImage = imread(self.imagePath)
+        self.sourceImage = rgb2gray(self.rawImage)
         # remove black borders from image
         iim = self.sourceImage > 0
         imageObjects = ndimage.find_objects(iim)

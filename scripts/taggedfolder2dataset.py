@@ -1,10 +1,10 @@
-import argparse
 
 from dataset.image_folder_group import process_base_folder, save_dataset
+from ocr_utils import ArgParserWithDefaultHelp
 
 
 def process_arguments():
-    parser = argparse.ArgumentParser(description='Dataset creation tool from several folders')
+    parser = ArgParserWithDefaultHelp(description='Dataset creation tool from several folders')
     parser.add_argument('folder', help='Folder, that contains folders with frames')
     parser.add_argument('train', help='Train dataset')
     parser.add_argument('test', help='Test dataset')

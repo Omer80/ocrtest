@@ -1,5 +1,5 @@
 from classifier import test_images
-from ocr_utils import ArgParserWithDefaultHelp
+from ocr_utils import ArgParserWithDefaultHelp, init_console_logging
 
 
 def process_arguments():
@@ -7,12 +7,17 @@ def process_arguments():
     parser.add_argument('classifier', help='Classifier')
     parser.add_argument('folder', help='Folders with frames (divided into two parts: positive and negative examples')
     parser.add_argument('-o', '--output', help='Incorrect results folder')
+    parser.add_argument('--verbose', dest='verbose', action='store_true', help='Debug output')
+    parser.set_defaults(verbose=False)
 
     return parser.parse_args()
 
 
 if __name__ == '__main__':
     args = process_arguments()
+
+    if args.verbose:
+        init_console_logging()
 
     classifier = test_images.loadClassifier(args.classifier)
     truePositive, falseNegative, trueNegative, falsePositive = \

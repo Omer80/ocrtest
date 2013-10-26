@@ -13,11 +13,11 @@ def process_base_folder(folder,
                         onlyFirstTagSymbol=False):
 
     dc = DatasetCreator()
+    rules = large_train if rulesType == 'large' else small_train
     for f in os.listdir(folder):
         ff = os.path.join(folder, f)
         if os.path.isdir(ff):
             if not prefix or f.startswith(prefix):
-                rules = large_train if rulesType == 'large' else small_train
                 process_folder(ff,
                                rules=rules,
                                negativeMultiplicator=negativeMultiplicator,

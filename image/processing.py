@@ -1,3 +1,4 @@
+import random
 import numpy as np
 
 from scipy import ndimage
@@ -55,7 +56,19 @@ class Image(object):
                 t = self.tagPosition
                 self.tagPosition = (t[0], t[1] + missingColumns, t[2], t[3] + missingColumns)
 
-    def extractFeatures(self, positiveImageTemplate=None):
+    def isWindowInTagArea(self, x, y):
+        if (x+self.windowSize[0] - self.tagPosition[0]) >= (self.windowSize[0] / 3) \
+                    and (y+self.windowSize[1] - self.tagPosition[1]) >= (self.windowSize[1] / 3) \
+                    and (self.tagPosition[2] - x) >= (self.windowSize[0] / 3) \
+                    and (self.tagPosition[3] - y) >= (self.windowSize[1] / 3):
+            return True
+        else:
+            return False
+
+    def getWindow(self, x, y):
+        return self.image[x:x+self.windowSize[0], y:y+self.windowSize[1]]
+
+    def extractAllFeatures(self, positiveImageTemplate=None):
         windowSize, shiftSize, tagPosition = self.windowSize, self.shiftSize, self.tagPosition
         # if positiveImageTemplate is not None:
         #     imsave(positiveImageTemplate % (-1,), self.image)
@@ -73,12 +86,7 @@ class Image(object):
             wSized = resize(w, self.finalWindowResolution)
             features = feature.hog(wSized)
 
-            if self.tagPosition \
-                    and (x+windowSize[0] - tagPosition[0]) >= (windowSize[0] / 3) \
-                    and (y+windowSize[1] - tagPosition[1]) >= (windowSize[1] / 3) \
-                    and (tagPosition[2] - x) >= (windowSize[0] / 3) \
-                    and (tagPosition[3] - y) >= (windowSize[1] / 3):
-
+            if self.tagPosition and self.isWindowInTagArea(x, y):
                 if positiveImageTemplate is not None:
                     imsave(positiveImageTemplate % (j,), w)
                     j += 1
@@ -86,13 +94,67 @@ class Image(object):
             else:
                 self.negativeExamples.append(features)
 
-    def process(self, positiveImageTemplate=None):
+    def extractFeatures(self, positiveImageTemplate=None, negativeMultiplicator=None):
+        if negativeMultiplicator is None or self.tagPosition is None:
+            self.extractAllFeatures(positiveImageTemplate)
+            return
+
+        windowSize, shiftSize, tagPosition = self.windowSize, self.shiftSize, self.tagPosition
+
+        # count rows/columns amount
+        s = ((np.array(self.image.shape) - np.array(windowSize)) // np.array(shiftSize)) + 1
+        self.windowsAmountInfo = s
+
+        negativeIndexes = []
+        positiveWindows = []
+
+        windowsAmount = s[0] * s[1]
+        x, y = -shiftSize[0], 0
+        for i in xrange(windowsAmount):
+            y += shiftSize[1]
+            if i % s[1] == 0:
+                y = 0
+                x += shiftSize[0]
+
+            if self.isWindowInTagArea(x, y):
+                positiveWindows.append(self.getWindow(x, y))
+            else:
+                negativeIndexes.append(i)
+
+        negativeAmount = int(len(positiveWindows) * negativeMultiplicator)
+        if negativeAmount < len(negativeIndexes):
+            random.shuffle(negativeIndexes)
+            negativeIndexes = negativeIndexes[:negativeAmount]
+
+        negativeWindows = []
+        for i in negativeIndexes:
+            x, y = (i / s[1])*shiftSize[0], (i % s[1])*shiftSize[1]
+            negativeWindows.append(self.getWindow(x, y))
+
+        j = 0
+        self.positiveExamples = []
+        for window in positiveWindows:
+            wSized = resize(window, self.finalWindowResolution)
+            features = feature.hog(wSized)
+            self.positiveExamples.append(features)
+
+            if positiveImageTemplate is not None:
+                imsave(positiveImageTemplate % (j,), window)
+                j += 1
+
+        self.negativeExamples = []
+        for window in negativeWindows:
+            wSized = resize(window, self.finalWindowResolution)
+            features = feature.hog(wSized)
+            self.negativeExamples.append(features)
+
+    def process(self, positiveImageTemplate=None, negativeMultiplicator=None):
         self.prepare()
-        self.extractFeatures(positiveImageTemplate)
+        self.extractFeatures(positiveImageTemplate, negativeMultiplicator)
         return self.positiveExamples, self.negativeExamples
 
 
-def process_single_image(filename, tagPosition, positiveImageTemplate=None):
+def process_single_image(filename, tagPosition, positiveImageTemplate=None, negativeMultiplicator=None):
     image = Image(filename, tagPosition=tagPosition)
-    return image.process(positiveImageTemplate=positiveImageTemplate)
+    return image.process(positiveImageTemplate, negativeMultiplicator)
 

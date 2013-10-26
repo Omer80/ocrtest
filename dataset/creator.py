@@ -10,13 +10,7 @@ from image.processing import process_single_image
 
 
 def process_n_cut_single_image(filename, tagPosition, negativeMultiplicator=3, positiveImageTemplate=None):
-    positive, negative = process_single_image(filename, tagPosition, positiveImageTemplate)
-
-    # todo: fix multi-threading bug with using same global random object
-    random.shuffle(negative)
-    negativeMAmount = int(len(positive) * negativeMultiplicator)
-    if negativeMAmount < len(negative):
-        negative = negative[:negativeMAmount]
+    positive, negative = process_single_image(filename, tagPosition, positiveImageTemplate, negativeMultiplicator)
 
     return filename, positive, negative
 

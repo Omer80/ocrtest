@@ -70,7 +70,7 @@ def process_file_list(classifier, filelist, countPositive, outputFolder=None):
         tasks.append(delayed(process_image)(classifier, image, outputFolder is not None))
 
 
-    p = Parallel(n_jobs=2, verbose=100, pre_dispatch=2)
+    p = Parallel(n_jobs=1, verbose=100, pre_dispatch=1)
 #    p = Parallel(n_jobs=-1, verbose=100, pre_dispatch='3*n_jobs')
     results = p(tasks)
 

@@ -5,6 +5,22 @@ from misc.file_helper import FileHelper
 
 
 class HashtagRecognition(object):
+    """
+    Usage example:
+
+    from dataset.utils import load
+    from api.hashtag import HashtagRecognition
+
+    def init_hashtag_recognition(path_to_classifier):
+        classifier = load(path_to_classifier)
+        return HashtagRecognition(classifier)
+
+
+    def process_folder(folder, hashtag):
+        positive, negative = hashtag.process_folder(folder)
+        # processing positive and negative frames
+
+    """
     def __init__(self, classifier):
         self.classifier = classifier
 

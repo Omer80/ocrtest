@@ -48,6 +48,7 @@ class HashtagRecognition(object):
         Returns: (positive, negative)
             Tuple with two lists: positive and negative file names
         """
+        # todo: parallel processing
         # todo: use information about two neighbours frames (if hashtag on the same position in two neighbour frames - it is good sign)
         positive, negative = [], []
         for f in filenames:

@@ -60,8 +60,7 @@ def process_image(classifier, image, drawPositiveWindows=False):
     return image, isPositive
 
 
-def process_file_list(classifier, filelist, countPositive, outputFolder=None):
-    logger = logging.getLogger("TestClassifier")
+def process_file_list(classifier, filelist, countPositive, outputFolder=None, jobs=-1):
     total, amount = 0, 0
     tasks = []
     for filename in filelist:
@@ -70,8 +69,7 @@ def process_file_list(classifier, filelist, countPositive, outputFolder=None):
         tasks.append(delayed(process_image)(classifier, image, outputFolder is not None))
 
 
-    p = Parallel(n_jobs=1, verbose=100, pre_dispatch=1)
-#    p = Parallel(n_jobs=-1, verbose=100, pre_dispatch='3*n_jobs')
+    p = Parallel(n_jobs=jobs, verbose=100)
     results = p(tasks)
 
     for image, isPositive in results:
@@ -83,12 +81,12 @@ def process_file_list(classifier, filelist, countPositive, outputFolder=None):
     return total-amount, amount
 
 
-def process_folder(classifier, inputFolder, countPositive, outputFolder=None):
+def process_folder(classifier, inputFolder, countPositive, outputFolder=None, jobs=-1):
     filelist = [os.path.join(inputFolder, fn) for fn in FileHelper.read_images_in_dir(inputFolder)]
-    return process_file_list(classifier, filelist, countPositive, outputFolder)
+    return process_file_list(classifier, filelist, countPositive, outputFolder, jobs)
 
 
-def process_sample(classifier, inputFolder, outputFolder=None):
+def process_sample(classifier, inputFolder, outputFolder=None, jobs=-1):
     logger = logging.getLogger("TestClassifier")
 
     positiveInput = os.path.join(inputFolder, 'positive')
@@ -102,10 +100,10 @@ def process_sample(classifier, inputFolder, outputFolder=None):
         FileHelper.create_or_clear_dir(falseNegativeOutput)
 
     logger.debug('Process negative examples')
-    trueNegative, falsePositive = process_folder(classifier, negativeInput, True, falsePositiveOutput)
+    trueNegative, falsePositive = process_folder(classifier, negativeInput, True, falsePositiveOutput, jobs)
     logger.info('False positives: %d; True negatives: %d' % (falsePositive, trueNegative))
     logger.debug('Process positive examples')
-    truePositive, falseNegative = process_folder(classifier, positiveInput, False, falseNegativeOutput)
+    truePositive, falseNegative = process_folder(classifier, positiveInput, False, falseNegativeOutput, jobs)
     logger.info('True positives: %d; False negatives: %d' % (truePositive, falseNegative))
 
     return truePositive, falseNegative, trueNegative, falsePositive

@@ -90,8 +90,8 @@ class Image(object):
         s = ((np.array(self.image.shape) - np.array(windowSize)) // np.array(shiftSize)) + 1
         self.windowsAmountInfo = s
         windows = sliding_window(self.image, windowSize, shiftSize)
-        self.positiveExamples = []
-        self.negativeExamples = []
+        positiveExamples = []
+        negativeExamples = []
         j = 0
         for i, w in enumerate(windows):
             x, y = (i / s[1])*shiftSize[0], (i % s[1])*shiftSize[1]
@@ -103,14 +103,19 @@ class Image(object):
                 if positiveImageTemplate is not None:
                     imsave(positiveImageTemplate % (j,), w)
                     j += 1
-                self.positiveExamples.append(features)
+                positiveExamples.append(features)
             else:
-                self.negativeExamples.append(features)
+                negativeExamples.append(features)
+
+        if self.saveFeatures:
+            self.positiveExamples = positiveExamples
+            self.negativeExamples = negativeExamples
+
+        return positiveExamples, negativeExamples
 
     def extractFeatures(self, positiveImageTemplate=None, negativeMultiplicator=None):
         if negativeMultiplicator is None or self.tagPosition is None:
-            self.extractAllFeatures(positiveImageTemplate)
-            return
+            return self.extractAllFeatures(positiveImageTemplate)
 
         windowSize, shiftSize, tagPosition = self.windowSize, self.shiftSize, self.tagPosition
 

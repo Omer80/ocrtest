@@ -52,8 +52,6 @@ class Image(object):
         self.missingRows = 0
         if imsh[0] % self.shiftSize[0] != 0:
             missingRows = self.shiftSize[0] - (imsh[0] % self.shiftSize[0])
-            logging.debug(str(imsh))
-            logging.debug(missingRows)
             self.image = np.vstack([np.reshape(np.zeros(missingRows * imsh[1]), (missingRows, imsh[1])), self.image])
             self.missingRows = missingRows
             if self.tagPosition:

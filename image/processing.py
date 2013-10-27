@@ -12,7 +12,7 @@ from image.window import sliding_window
 
 
 class Image(object):
-    def __init__(self, image, windowSize=(64, 64), shiftSize=(32, 32), tagPosition=None):
+    def __init__(self, image, windowSize=(64, 64), shiftSize=(32, 32), tagPosition=None, saveFeatures=False):
         if isinstance(image, basestring):
             self.imagePath = image
             self.rawImage = None
@@ -21,6 +21,7 @@ class Image(object):
 
         self.windowSize = windowSize
         self.shiftSize = shiftSize
+        self.saveFeatures = saveFeatures
 
         # version for tagPosition creation with height and width instead of low-right corner coordinates
         # t = tagPosition
@@ -144,26 +145,31 @@ class Image(object):
             negativeWindows.append(self.getWindow(x, y))
 
         j = 0
-        self.positiveExamples = []
+        positiveExamples = []
         for window in positiveWindows:
             wSized = resize(window, self.finalWindowResolution)
             features = feature.hog(wSized)
-            self.positiveExamples.append(features)
+            positiveExamples.append(features)
 
             if positiveImageTemplate is not None:
                 imsave(positiveImageTemplate % (j,), window)
                 j += 1
 
-        self.negativeExamples = []
+        negativeExamples = []
         for window in negativeWindows:
             wSized = resize(window, self.finalWindowResolution)
             features = feature.hog(wSized)
-            self.negativeExamples.append(features)
+            negativeExamples.append(features)
+
+        if self.saveFeatures:
+            self.positiveExamples = positiveExamples
+            self.negativeExamples = negativeExamples
+
+        return positiveExamples, negativeExamples
 
     def process(self, positiveImageTemplate=None, negativeMultiplicator=None):
         self.prepare()
-        self.extractFeatures(positiveImageTemplate, negativeMultiplicator)
-        return self.positiveExamples, self.negativeExamples
+        return self.extractFeatures(positiveImageTemplate, negativeMultiplicator)
 
 
 def process_single_image(filename, tagPosition, positiveImageTemplate=None, negativeMultiplicator=None):

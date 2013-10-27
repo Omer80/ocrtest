@@ -33,7 +33,7 @@ def createNeighbourWindows(image, x, y, amount=7):
     return [image.getWindow(nx, ny) for nx, ny in coordinates]
 
 
-def process_image(classifier, image, drawPositiveWindows=False):
+def process_image(classifier, image, outputFolder=None):
     _, windows = image.process()
     result = classifier.predict(windows)
 
@@ -43,7 +43,7 @@ def process_image(classifier, image, drawPositiveWindows=False):
         if r:
             xc = (i / image.windowsAmountInfo[1])
             yc = (i % image.windowsAmountInfo[1])
-            if drawPositiveWindows:
+            if outputFolder:
                 x = xc * image.shiftSize[0]
                 y = yc * image.shiftSize[1]
                 b = image.bounds
@@ -57,7 +57,10 @@ def process_image(classifier, image, drawPositiveWindows=False):
                 isPositive = True
             px, py = xc, yc
 
-    return image, isPositive
+    if outputFolder:
+        imsave(os.path.join(outputFolder, os.path.split(image.imagePath)[1]), image.sourceImage)
+
+    return image.imagePath, isPositive
 
 
 def process_file_list(classifier, filelist, countPositive, outputFolder=None, jobs=-1):
@@ -72,11 +75,9 @@ def process_file_list(classifier, filelist, countPositive, outputFolder=None, jo
     p = Parallel(n_jobs=jobs, verbose=100)
     results = p(tasks)
 
-    for image, isPositive in results:
+    for filename, isPositive in results:
         if isPositive == countPositive:
             amount += 1
-            if outputFolder:
-                imsave(os.path.join(outputFolder, os.path.split(image.imagePath)[1]), image.sourceImage)
 
     return total-amount, amount
 

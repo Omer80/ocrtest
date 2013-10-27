@@ -5,6 +5,7 @@ import random
 from skimage.draw._draw import line
 from skimage.io import imsave
 from sklearn.externals import joblib
+from sklearn.externals.joblib import delayed, Parallel
 
 from image.processing import Image
 from misc.file_helper import FileHelper
@@ -56,26 +57,34 @@ def process_image(classifier, image, drawPositiveWindows=False):
                 isPositive = True
             px, py = xc, yc
 
-    return isPositive
+    return image, isPositive
 
 
-def process_folder(classifier, inputFolder, countPositive, outputFolder=None):
+def process_file_list(classifier, filelist, countPositive, outputFolder=None):
     logger = logging.getLogger("TestClassifier")
     total, amount = 0, 0
-    for filename in FileHelper.read_images_in_dir(inputFolder):
+    tasks = []
+    for filename in filelist:
         total += 1
-        logger.debug('Processing %s' % (filename,))
+        image = Image(filename)
+        tasks.append(delayed(process_image)(classifier, image, outputFolder is not None))
 
-        image = Image(os.path.join(inputFolder, filename))
-        isPositive = process_image(classifier, image, outputFolder is not None)
 
-        logger.debug('Processed %s (%s)' % (filename, 'positive' if isPositive else 'negative'))
+    p = Parallel(n_jobs=-1, verbose=100, pre_dispatch='3*n_jobs')
+    results = p(tasks)
+
+    for image, isPositive in results:
         if isPositive == countPositive:
             amount += 1
             if outputFolder:
-                imsave(os.path.join(outputFolder, filename), image.sourceImage)
+                imsave(os.path.join(outputFolder, os.path.split(image.imagePath)[1]), image.sourceImage)
 
     return total-amount, amount
+
+
+def process_folder(classifier, inputFolder, countPositive, outputFolder=None):
+    filelist = [os.path.join(inputFolder, fn) for fn in FileHelper.read_images_in_dir(inputFolder)]
+    return process_file_list(classifier, filelist, countPositive, outputFolder)
 
 
 def process_sample(classifier, inputFolder, outputFolder=None):

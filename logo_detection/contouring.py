@@ -2,9 +2,8 @@ import os
 
 import cv2
 import numpy as np
+from logo_detection import binarization
 from misc.file_helper import FileHelper
-
-from scripts import binarization
 
 
 def drawContours(image, contours):

@@ -35,11 +35,15 @@ class SIFTComparer:
         # #     pass
 
 
-        self.detector = cv2.SIFT(3200)
+        # self.detector = cv2.SIFT(3200)
+        self.detector = cv2.SIFT(900, edgeThreshold=30)
+        # self.detector = cv2.SURF(300)
+        # self.detector = cv2.SURF(30, upright=1)
+        # self.detector = cv2.BRISK()
         # matcher = cv2.BFMatcher(cv2.NORM_L2)
 
         FLANN_INDEX_KDTREE = 0
-        index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
+        index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=15)
         search_params = dict(checks=50)
         self.matcher = cv2.FlannBasedMatcher(index_params, search_params)
 
@@ -63,8 +67,9 @@ class SIFTComparer:
         kp2, desc2 = self.detector.detectAndCompute(image, None)
         logging.debug('img1 - %d features' % len(kp2))
         for name, (kp1, desc1) in self.templatesFeatures.iteritems():
-            raw_matches = self.matcher.knnMatch(desc1, trainDescriptors=desc2, k=2)
-            kp_pairs = self.__filter_matches(kp1, kp2, raw_matches)
+            # raw_matches = self.matcher.knnMatch(desc1, trainDescriptors=desc2, k=2)
+            raw_matches = self.matcher.knnMatch(desc1, desc2, k=2)
+            kp_pairs = self.__filter_matches(kp1, kp2, raw_matches, 0.7)
 
             if len(kp_pairs) >= self.MIN_MATCH_COUNT:
                 img1 = cv2.imread(os.path.join(self.templates_dir, name), cv2.IMREAD_GRAYSCALE)
@@ -79,6 +84,7 @@ class SIFTComparer:
         mkp1, mkp2 = [], []
         for m in matches:
             if len(m) == 2 and m[0].distance < m[1].distance * ratio:
+            # if m[0].distance < m[1].distance * 0.7:
                 m = m[0]
                 mkp1.append(kp1[m.queryIdx])
                 mkp2.append(kp2[m.trainIdx])
@@ -163,7 +169,8 @@ if __name__ == '__main__':
     obj = SIFTComparer('../logos', '../in')
     # img1 = cv2.imread('../in/784_00493.jpg', cv2.IMREAD_GRAYSCALE)
     # img1 = cv2.imread('../in/clip0a28ae_00004.jpg', cv2.IMREAD_GRAYSCALE)
-    img1 = cv2.imread('../in/Pic21.png', cv2.IMREAD_GRAYSCALE)
+    # img1 = cv2.imread('../in/Pic21.png', cv2.IMREAD_GRAYSCALE)
+    img1 = cv2.imread('../in/Pic01.png', cv2.IMREAD_GRAYSCALE)
     # img2 = cv2.imread(dir_images, 0)
 
     obj.compareImageWithTemplates(img1)

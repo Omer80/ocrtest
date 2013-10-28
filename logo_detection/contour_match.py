@@ -5,10 +5,10 @@ from collections import namedtuple
 
 import cv2
 import numpy as np
+from logo_detection import binarization
 
 import ocr_utils
 from file_helper import FileHelper
-from scripts import binarization
 
 
 ImageContours = namedtuple('ImageContours', ['contours', 'hierarchy'])

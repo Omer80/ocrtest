@@ -119,12 +119,12 @@ if __name__ == '__main__':
     # basefile = '/home/valeriy/projects/hashtag/logos/bin_frames/5_00735.jpg'
     # basefile_without_ext = '/home/valeriy/projects/hashtag/logos/bin_frames/5_00735'
 
-    template = binarization.load_image_thresholding('/home/valeriy/projects/hashtag/logos/learn/twitter_big_template.png', 127)
+    template = binarization.load_image_thresholding('/home/valeriy/projects/hashtag/logos/bw/twitter_big_template.png', 127)
     base_template = template.copy()
     template_contours, template_hierarchy = cv2.findContours(template, cv2.RETR_EXTERNAL, findContourMethod)
 
     base_template = drawContours(base_template, template_contours)
-    cv2.imwrite('/home/valeriy/projects/hashtag/logos/learn/twitter_big_template_contours.png', base_template)
+    cv2.imwrite('/home/valeriy/projects/hashtag/logos/bw/twitter_big_template_contours.png', base_template)
 
     if len(template_contours) > 1:
         print 'Warning: too complex template'

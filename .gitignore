@@ -1,6 +1,7 @@
 /.idea
 /in
 /out
+/tests
 *.csv
 *.gzip
 /persisted/*.pkl

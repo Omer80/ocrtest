@@ -13,6 +13,13 @@ from ocr_utils import ArgParserWithDefaultHelp
 
 Condition = namedtuple('Condition', ['cond_function', 'train'])
 
+large_sample = [
+    Condition(lambda x: x <= 30, 0.99),
+    Condition(lambda x: x < 100, 30),
+    Condition(lambda x: x < 300, 70),
+    Condition(lambda x: x >= 300, 100)
+]
+
 middle_sample = [
     Condition(lambda x: x <= 10, 0.99),
     Condition(lambda x: x < 100, 10),
@@ -73,7 +80,7 @@ def process_arguments():
     parser = ArgParserWithDefaultHelp(description='Extract frames sample tool from several folders')
     parser.add_argument('folder', help='Folder, that contains folders with frames')
     parser.add_argument('output', help='Folder, to copy selected frames')
-    parser.add_argument('-s', '--size', dest='size', default='middle', choices=['middle', 'small', 'extrasmall'], help='Size of sample')
+    parser.add_argument('-s', '--size', dest='size', default='middle', choices=['large', 'middle', 'small', 'extrasmall'], help='Size of sample')
     parser.add_argument('--save-structure', dest='saveStructure', action='store_true', help='Save folder structure in output folder')
     parser.set_defaults(saveStructure=False)
 
@@ -86,7 +93,9 @@ if __name__ == '__main__':
         rules = extra_small_sample
     elif args.size == 'small':
         rules = small_sample
-    else:
+    elif args.size == 'middle':
         rules = middle_sample
+    else:
+        rules = large_sample
 
     process_folder_group(args.folder, args.output, args.saveStructure, rules)

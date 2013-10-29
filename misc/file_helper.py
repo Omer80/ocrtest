@@ -1,9 +1,8 @@
 # coding=utf-8
-import shutil
-
 __author__ = 'Roman Podlinov'
 
 import os
+import shutil
 
 
 class FileHelper:
@@ -13,11 +12,17 @@ class FileHelper:
         if path == '/' or path == "\\":
             return
 
-        for root, dirs, files in os.walk(path, topdown=False):
-            for name in files:
-                os.remove(os.path.join(root, name))
-            for name in dirs:
-                shutil.rmtree(os.path.join(root, name))
+        for obj in os.listdir(path):
+            if os.path.isfile(obj):
+                os.remove(os.path.join(path, obj))
+            else:
+                shutil.rmtree(os.path.join(path, obj))
+
+        # for root, dirs, files in os.walk(path, topdown=False):
+        #     for name in files:
+        #         os.remove(os.path.join(root, name))
+        #     for name in dirs:
+        #         shutil.rmtree(os.path.join(root, name))
 
     @staticmethod
     def read_images_in_dir(dir, load_pattern='.png:.jpg:.jpeg:.gif'):

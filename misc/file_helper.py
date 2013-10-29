@@ -25,12 +25,15 @@ class FileHelper:
         #         shutil.rmtree(os.path.join(root, name))
 
     @staticmethod
-    def read_images_in_dir(dir, load_pattern='.png:.jpg:.jpeg:.gif'):
+    def read_images_in_dir(dir, load_pattern='.png:.jpg:.jpeg:.gif', includeDir=False):
         load_pattern = tuple([ext.lower() for ext in load_pattern.split(':')])
         matches = []
         for filename in os.listdir(dir):
             if os.path.isfile(os.path.join(dir, filename)) and filename.lower().endswith(load_pattern):
-                matches.append(filename)
+                if includeDir:
+                    matches.append(os.path.join(dir, filename))
+                else:
+                    matches.append(filename)
 
         return matches
 

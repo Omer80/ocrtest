@@ -23,10 +23,9 @@ class FileHelper:
     def read_images_in_dir(dir, load_pattern='.png:.jpg:.jpeg:.gif'):
         load_pattern = tuple([ext.lower() for ext in load_pattern.split(':')])
         matches = []
-        for root, dirnames, filenames in os.walk(dir):
-            for filename in filenames:
-                if filename.lower().endswith(load_pattern):
-                    matches.append(filename)
+        for filename in os.listdir(dir):
+            if os.path.isfile(os.path.join(dir, filename)) and filename.lower().endswith(load_pattern):
+                matches.append(filename)
 
         return matches
 

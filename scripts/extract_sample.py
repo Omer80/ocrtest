@@ -28,9 +28,9 @@ middle_sample = [
 
 small_sample = [
     Condition(lambda x: x <= 4, 0.99),
-    Condition(lambda x: x <= 10, 3),
-    Condition(lambda x: x < 100, 5),
-    Condition(lambda x: x >= 100, 7)
+    Condition(lambda x: x <= 10, 4),
+    Condition(lambda x: x < 100, 7),
+    Condition(lambda x: x >= 100, 10)
 ]
 
 extra_small_sample = [

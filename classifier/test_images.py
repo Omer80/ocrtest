@@ -11,6 +11,15 @@ from misc.file_helper import FileHelper
 
 
 def drawRectangle(image, rec):
+    rec = list(rec)
+    if rec[1] >= image.shape[1]:
+        rec[1] = image.shape[1] - 1
+    if rec[3] >= image.shape[1]:
+        rec[3] = image.shape[1] - 1
+    if rec[0] >= image.shape[0]:
+        rec[0] = image.shape[0] - 1
+    if rec[2] >= image.shape[0]:
+        rec[2] = image.shape[0] - 1
     rr, cc = line(rec[0], rec[1], rec[0], rec[3])
     image[rr, cc] = 1
     rr, cc = line(rec[0], rec[3], rec[2], rec[3])
@@ -35,6 +44,12 @@ def process_image(classifier, image, positiveOutputFolder=None, negativeOutputFo
                 x = xc * image.shiftSize[0]
                 y = yc * image.shiftSize[1]
                 b = image.bounds
+                # drawRectangle(image.image, (x,
+                #                             y,
+                #                             x+image.windowSize[0],
+                #                             y+image.windowSize[1],
+                #                             )
+                # )
                 drawRectangle(image.sourceImage, (x + b[0].start-1,  # - image.missingRows,
                                                   y + b[1].start-1,  # - image.missingColumns,
                                                   x+image.windowSize[0]-1 + b[0].start-1,  # - image.missingRows,

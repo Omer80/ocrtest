@@ -9,8 +9,8 @@ from sklearn.externals.joblib import delayed, Parallel
 from image.processing import process_single_image
 
 
-def process_n_cut_single_image(filename, tagPosition, negativeMultiplicator=3, positiveImageTemplate=None):
-    positive, negative = process_single_image(filename, tagPosition, positiveImageTemplate, negativeMultiplicator)
+def process_n_cut_single_image(filename, tagPosition, negativeMultiplicator=3, positiveImageTemplate=None, positiveWindowNeighboursAmount=7):
+    positive, negative = process_single_image(filename, tagPosition, positiveImageTemplate, negativeMultiplicator, positiveWindowNeighboursAmount)
 
     return filename, positive, negative
 
@@ -25,7 +25,7 @@ class DatasetCreator(object):
         self.trainParallelTasks = []
         self.testParallelTasks = []
 
-    def _prepareParallelTasks(self, files, tagPosition, negativeMultiplicator, interestingWindowsFolder=None):
+    def _prepareParallelTasks(self, files, tagPosition, negativeMultiplicator, interestingWindowsFolder=None, positiveWindowNeighboursAmount=7):
         taskQueue = []
         for filename in files:
             if interestingWindowsFolder:
@@ -35,19 +35,19 @@ class DatasetCreator(object):
             else:
                 positiveImageTemplate = None
 
-            taskQueue.append(delayed(process_n_cut_single_image)(filename, tagPosition, negativeMultiplicator, positiveImageTemplate))
+            taskQueue.append(delayed(process_n_cut_single_image)(filename, tagPosition, negativeMultiplicator, positiveImageTemplate, positiveWindowNeighboursAmount))
 
         return taskQueue
 
-    def prepareImageProcessing(self, trainFiles, testFiles, tagPosition, negativeMultiplicator=3, interestingWindowsFolder=None):
+    def prepareImageProcessing(self, trainFiles, testFiles, tagPosition, negativeMultiplicator=3, interestingWindowsFolder=None, positiveWindowNeighboursAmount=7):
         if interestingWindowsFolder and not os.path.exists(interestingWindowsFolder):
             os.makedirs(interestingWindowsFolder)
 
         self.trainFilenames.extend(trainFiles)
         self.testFilenames.extend(testFiles)
 
-        self.trainParallelTasks.extend(self._prepareParallelTasks(trainFiles, tagPosition, negativeMultiplicator, interestingWindowsFolder))
-        self.testParallelTasks.extend(self._prepareParallelTasks(testFiles, tagPosition, negativeMultiplicator, interestingWindowsFolder))
+        self.trainParallelTasks.extend(self._prepareParallelTasks(trainFiles, tagPosition, negativeMultiplicator, interestingWindowsFolder, positiveWindowNeighboursAmount))
+        self.testParallelTasks.extend(self._prepareParallelTasks(testFiles, tagPosition, negativeMultiplicator, interestingWindowsFolder, positiveWindowNeighboursAmount))
 
     def _processResult(self, features, dataset):
         for filename, positive, negative in features:

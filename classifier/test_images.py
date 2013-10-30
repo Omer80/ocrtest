@@ -1,6 +1,5 @@
 import os
 import logging
-import random
 
 from skimage.draw._draw import line
 from skimage.io import imsave
@@ -20,17 +19,6 @@ def drawRectangle(image, rec):
     image[rr, cc] = 1
     rr, cc = line(rec[2], rec[1], rec[0], rec[1])
     image[rr, cc] = 1
-
-
-def createNeighbourWindows(image, x, y, amount=7):
-    coordinates = set()
-    while len(coordinates) < amount:
-        nx = int(random.gauss(x, image.shiftSize[0] / 2))
-        ny = int(random.gauss(y, image.shiftSize[1] / 2))
-        if nx + image.windowSize[0] < image.image.shape[0] and ny + image.windowSize[1] < image.image.shape[1]:
-            coordinates.add((nx, ny))
-
-    return [image.getWindow(nx, ny) for nx, ny in coordinates]
 
 
 def process_image(classifier, image, outputFolder=None):

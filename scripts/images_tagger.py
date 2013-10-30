@@ -37,7 +37,7 @@ class FolderTagger(object):
             32: 'next',
         }
         showTagAction = set(range(48, 58))
-        moveActions = set([98, 102, 103, 110, 116])
+        moveActions = set([97, 98, 102, 103, 110, 115, 116])
 
         key = 0
         while key not in stopActions:
@@ -77,6 +77,8 @@ class FolderTagger(object):
                                 break
                         if self.isNewTag:
                             self.tags.insert(0, self.currentTag)
+                            if len(self.tags) > 9:
+                                self.tags = self.tags[:9]
                             self.isNewTag = False
 
                     if key == 103:
@@ -87,6 +89,10 @@ class FolderTagger(object):
                         self.move(self.filename, os.path.join(self.twitterPath, taggedFolder))
                     if key == 102:
                         self.move(self.filename, os.path.join(self.facebookPath, taggedFolder))
+                    if key == 97:   # a
+                        self.move(self.filename, os.path.join(self.awfulPath, taggedFolder))
+                    if key == 115:  # s
+                        self.move(self.filename, os.path.join(self.atPath, taggedFolder))
 
                     return 'next'
 
@@ -154,6 +160,7 @@ class FolderTagger(object):
         return True
 
     def tag_folder(self, folder, output):
+        print folder
         if folder[-1] == '\\':
             folder = folder[:-1]
         self.currentFolder = folder
@@ -162,18 +169,23 @@ class FolderTagger(object):
         self.negativePath = os.path.join(output, 'negative')
         self.goodPath = os.path.join(output, 'good')
         self.badPath = os.path.join(output, 'bad')
+        self.awfulPath = os.path.join(output, 'awful')
         self.twitterPath = os.path.join(output, 'twitter')
         self.facebookPath = os.path.join(output, 'facebook')
+        self.atPath = os.path.join(output, 'at')
 
         self.filelist = sorted(FileHelper.read_images_in_dir(folder, includeDir=True))
-        self.show_next()
+        if not self.show_next():
+            shutil.rmtree(folder)
+            return True
         while True:
             action = self.wait_for_action()
             if action == 'break':
-                break
+                return False
             elif action == 'next':
                 if not self.show_next():
-                    break
+                    shutil.rmtree(folder)
+                    return True
 
     def destroy_windows(self):
         cv2.destroyAllWindows()
@@ -193,4 +205,5 @@ if __name__ == '__main__':
     ft = FolderTagger()
     for fn in os.listdir(args.folder):
         if os.path.isdir(os.path.join(args.folder, fn)):
-            ft.tag_folder(os.path.join(args.folder, fn), args.output)
+            if not ft.tag_folder(os.path.join(args.folder, fn), args.output):
+                break

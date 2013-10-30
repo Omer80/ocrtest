@@ -50,33 +50,45 @@ class Image(object):
 
         # extend image to be divisible by window shift
         imsh = self.image.shape
-        self.missingRows = 0
         if imsh[0] % self.shiftSize[0] != 0:
             missingRows = self.shiftSize[0] - (imsh[0] % self.shiftSize[0])
-            self.image = np.vstack([np.reshape(np.zeros(missingRows * imsh[1]), (missingRows, imsh[1])), self.image])
+            self.image = np.vstack([self.image, np.reshape(np.zeros(missingRows * imsh[1]), (missingRows, imsh[1]))])
             self.missingRows = missingRows
             if self.tagPosition:
                 t = self.tagPosition
                 self.tagPosition = (t[0] + missingRows, t[1], t[2] + missingRows, t[3])
 
         imsh = self.image.shape
-        self.missingColumns = 0
         if imsh[1] % self.shiftSize[1] != 0:
             missingColumns = self.shiftSize[1] - (imsh[1] % self.shiftSize[1])
-            self.image = np.hstack([np.reshape(np.zeros(missingColumns * imsh[0]), (imsh[0], missingColumns)), self.image])
+            self.image = np.hstack([self.image, np.reshape(np.zeros(missingColumns * imsh[0]), (imsh[0], missingColumns))])
             self.missingColumns = missingColumns
             if self.tagPosition:
                 t = self.tagPosition
                 self.tagPosition = (t[0], t[1] + missingColumns, t[2], t[3] + missingColumns)
 
     def isWindowInTagArea(self, x, y):
-        if (x+self.windowSize[0] - self.tagPosition[0]) >= (self.windowSize[0] / 3) \
-                    and (y+self.windowSize[1] - self.tagPosition[1]) >= (self.windowSize[1] / 3) \
-                    and (self.tagPosition[2] - x) >= (self.windowSize[0] / 3) \
-                    and (self.tagPosition[3] - y) >= (self.windowSize[1] / 3):
+        if (x+self.windowSize[0] - self.tagPosition[0]) >= (self.windowSize[0] / 4) \
+                    and (y+self.windowSize[1] - self.tagPosition[1]) >= (self.windowSize[1] / 4) \
+                    and (self.tagPosition[2] - x) >= (self.windowSize[0] / 4) \
+                    and (self.tagPosition[3] - y) >= (self.windowSize[1] / 4):
             return True
         else:
             return False
+
+    def createNeighbourWindows(self, x, y, amount=7):
+        coordinates = set()
+        tries = 0
+        while len(coordinates) < amount or tries < amount * 5:
+            tries += 1
+            nx = int(random.gauss(x, self.shiftSize[0] / 2))
+            ny = int(random.gauss(y, self.shiftSize[1] / 2))
+            if nx >= 0 and nx + self.windowSize[0] < self.image.shape[0] \
+                    and ny >= 0 and ny + self.windowSize[1] < self.image.shape[1]\
+                    and self.isWindowInTagArea(nx, ny):
+                coordinates.add((nx, ny))
+
+        return [self.getWindow(nx, ny) for nx, ny in coordinates]
 
     def getWindow(self, x, y):
         return self.image[x:x+self.windowSize[0], y:y+self.windowSize[1]]
@@ -113,7 +125,7 @@ class Image(object):
 
         return positiveExamples, negativeExamples
 
-    def extractFeatures(self, positiveImageTemplate=None, negativeMultiplicator=None):
+    def extractFeatures(self, positiveImageTemplate=None, negativeMultiplicator=None, positiveWindowNeighboursAmount=7):
         if negativeMultiplicator is None or self.tagPosition is None:
             return self.extractAllFeatures(positiveImageTemplate)
 
@@ -136,6 +148,7 @@ class Image(object):
 
             if self.isWindowInTagArea(x, y):
                 positiveWindows.append(self.getWindow(x, y))
+                positiveWindows.extend(self.createNeighbourWindows(x, y, amount=positiveWindowNeighboursAmount))
             else:
                 negativeIndexes.append(i)
 
@@ -157,8 +170,12 @@ class Image(object):
             positiveExamples.append(features)
 
             if positiveImageTemplate is not None:
-                imsave(positiveImageTemplate % (j,), window)
-                j += 1
+                try:
+                    imsave(positiveImageTemplate % (j,), window)
+                    j += 1
+                except ValueError, e:
+                    print self.imagePath
+                    print e
 
         negativeExamples = []
         for window in negativeWindows:
@@ -172,12 +189,12 @@ class Image(object):
 
         return positiveExamples, negativeExamples
 
-    def process(self, positiveImageTemplate=None, negativeMultiplicator=None):
+    def process(self, positiveImageTemplate=None, negativeMultiplicator=None, positiveWindowNeighboursAmount=7):
         self.prepare()
-        return self.extractFeatures(positiveImageTemplate, negativeMultiplicator)
+        return self.extractFeatures(positiveImageTemplate, negativeMultiplicator, positiveWindowNeighboursAmount)
 
 
-def process_single_image(filename, tagPosition, positiveImageTemplate=None, negativeMultiplicator=None):
+def process_single_image(filename, tagPosition, positiveImageTemplate=None, negativeMultiplicator=None, positiveWindowNeighboursAmount=7):
     image = Image(filename, tagPosition=tagPosition)
-    return image.process(positiveImageTemplate, negativeMultiplicator)
+    return image.process(positiveImageTemplate, negativeMultiplicator, positiveWindowNeighboursAmount)
 

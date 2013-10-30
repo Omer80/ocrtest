@@ -13,8 +13,9 @@ def process_arguments():
     parser.add_argument('-p', '--positive-fragments-folder', dest='positive_fragments_folder', default=None, help='Folder to put positive fragments of frames')
     parser.add_argument('-t', '--type', default='large', choices=['large', 'small'], help='Size of train set')
     parser.add_argument('-m', '--negmult', default=3, type=int, help='Negative multiplicator: how more negative examples than positive')
+    parser.add_argument('-n', '--neighbours-for-positive', dest='neighbours', default=7, type=int, help='Generate this neighbours amount for every positive window')
     parser.add_argument('-j', '--jobs', default=-1, type=int, help='Processes amount for feature extraction')
-    parser.add_argument('-o', '--dataset-type', dest='dataset_type', default='pkl', choices=['pkl', 'csv'], help='Type of dataset output')
+    parser.add_argument('-o', '--dataset-type', dest='dataset_type', default='csv', choices=['pkl', 'csv'], help='Type of dataset output')
     parser.add_argument('--only-first-symbol', dest='first_symbol_tag', action='store_true', help='Positive only on first symbol from tag')
     parser.set_defaults(first_symbol_tag=False)
 
@@ -31,6 +32,7 @@ if __name__ == '__main__':
                              rulesType=args.type,
                              jobs=args.jobs,
                              interestingWindowsFolder=args.positive_fragments_folder,
-                             onlyFirstTagSymbol=args.first_symbol_tag
-    )
+                             onlyFirstTagSymbol=args.first_symbol_tag,
+                             positiveWindowNeighboursAmount=args.neighbours)
+
     save_dataset(dc, args.train, args.test, args.train_files, args.test_files, args.dataset_type == 'csv')

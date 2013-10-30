@@ -10,7 +10,8 @@ def process_base_folder(folder,
                         jobs=-1,
                         prefix=None,
                         interestingWindowsFolder=None,
-                        onlyFirstTagSymbol=False):
+                        onlyFirstTagSymbol=False,
+                        positiveWindowNeighboursAmount=7):
 
     dc = DatasetCreator()
     rules = large_train if rulesType == 'large' else small_train
@@ -23,7 +24,8 @@ def process_base_folder(folder,
                                negativeMultiplicator=negativeMultiplicator,
                                datasetCreator=dc,
                                interestingWindowsFolder=interestingWindowsFolder,
-                               onlyFirstTagSymbol=onlyFirstTagSymbol
+                               onlyFirstTagSymbol=onlyFirstTagSymbol,
+                               positiveWindowNeighboursAmount=positiveWindowNeighboursAmount
                 )
 
     dc.processPrepared(jobs)

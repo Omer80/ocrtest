@@ -45,7 +45,8 @@ def process_folder(folder,
                    negativeMultiplicator=3,
                    interestingWindowsFolder=None,
                    datasetCreator=None,
-                   onlyFirstTagSymbol=False):
+                   onlyFirstTagSymbol=False,
+                   positiveWindowNeighboursAmount=7):
 
     files = []
     acceptableExtensions = ('jpg', 'jpeg', 'png')
@@ -82,7 +83,8 @@ def process_folder(folder,
                                           testFiles,
                                           tagPosition,
                                           negativeMultiplicator,
-                                          interestingWindowsFolder
+                                          interestingWindowsFolder,
+                                          positiveWindowNeighboursAmount
     )
 
     return datasetCreator

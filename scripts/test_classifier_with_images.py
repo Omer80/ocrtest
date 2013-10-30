@@ -7,8 +7,10 @@ def process_arguments():
     parser.add_argument('classifier', help='Classifier')
     parser.add_argument('folder', help='Folders with frames (divided into two parts: positive and negative examples')
     parser.add_argument('-o', '--output', help='Incorrect results folder')
+    parser.add_argument('--save-correct', dest='save_correct', action='store_true', help='Save correct determined images')
     parser.add_argument('-j', '--jobs', default=-1, type=int, help='Processes amount for feature extraction')
     parser.add_argument('--verbose', dest='verbose', action='store_true', help='Debug output')
+    parser.set_defaults(save_correct=False)
     parser.set_defaults(verbose=False)
 
     return parser.parse_args()
@@ -22,7 +24,7 @@ if __name__ == '__main__':
 
     classifier = test_images.loadClassifier(args.classifier)
     truePositive, falseNegative, trueNegative, falsePositive = \
-        test_images.process_sample(classifier, args.folder, args.output, args.jobs)
+        test_images.process_sample(classifier, args.folder, args.output, args.jobs, args.save_correct)
 
     if truePositive + falseNegative > 0:
         recall = truePositive / float(truePositive + falseNegative)

@@ -50,6 +50,8 @@ class Image(object):
 
         # extend image to be divisible by window shift
         imsh = self.image.shape
+
+        missingRows = 0
         if imsh[0] % self.shiftSize[0] != 0:
             missingRows = self.shiftSize[0] - (imsh[0] % self.shiftSize[0])
             self.image = np.vstack([self.image, np.reshape(np.zeros(missingRows * imsh[1]), (missingRows, imsh[1]))])
@@ -57,8 +59,9 @@ class Image(object):
             if self.tagPosition:
                 t = self.tagPosition
                 self.tagPosition = (t[0] + missingRows, t[1], t[2] + missingRows, t[3])
+        self.missingRows = missingRows
 
-        imsh = self.image.shape
+        missingColumns = 0
         if imsh[1] % self.shiftSize[1] != 0:
             missingColumns = self.shiftSize[1] - (imsh[1] % self.shiftSize[1])
             self.image = np.hstack([self.image, np.reshape(np.zeros(missingColumns * imsh[0]), (imsh[0], missingColumns))])
@@ -66,6 +69,7 @@ class Image(object):
             if self.tagPosition:
                 t = self.tagPosition
                 self.tagPosition = (t[0], t[1] + missingColumns, t[2], t[3] + missingColumns)
+        self.missingColumns = missingColumns
 
     def isWindowInTagArea(self, x, y):
         if (x+self.windowSize[0] - self.tagPosition[0]) >= (self.windowSize[0] / 4) \

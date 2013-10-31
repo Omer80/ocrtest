@@ -12,7 +12,7 @@ from image.window import sliding_window
 
 
 class Image(object):
-    def __init__(self, image, windowSize=(64, 64), shiftSize=(32, 32), tagPosition=None, saveFeatures=False):
+    def __init__(self, image, windowSize=(32, 32), shiftSize=(16, 16), tagPosition=None, saveFeatures=False):
         if isinstance(image, basestring):
             self.imagePath = image
             self.rawImage = None
@@ -183,7 +183,10 @@ class Image(object):
 
         negativeExamples = []
         for window in negativeWindows:
-            wSized = resize(window, self.finalWindowResolution)
+            if self.finalWindowResolution != self.windowSize:
+                wSized = resize(window, self.finalWindowResolution)
+            else:
+                wSized = window
             features = feature.hog(wSized)
             negativeExamples.append(features)
 

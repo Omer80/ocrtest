@@ -29,14 +29,6 @@ def create_image(image, tagPosition=None):
     return Image(image, **current_params)
 
 
-def hogFeatureDetector(window):
-    return feature.hog(window)
-
-
-def daisyFeatureDetector(window):
-    return feature.daisy(window).ravel()
-
-
 class Image(object):
     def __init__(self, image, windowSize=(64, 64), shiftSize=(32, 32), featuresWindowSize=(32, 32), featureDetector='hog', tagPosition=None, saveFeatures=False):
         if isinstance(image, basestring):
@@ -50,9 +42,9 @@ class Image(object):
         self.saveFeatures = saveFeatures
 
         if featureDetector == 'hog':
-            self.featureDetector = hogFeatureDetector
+            self.featureDetector = self.hogFeatureDetector
         elif featureDetector == 'daisy':
-            self.featureDetector = daisyFeatureDetector
+            self.featureDetector = self.daisyFeatureDetector
 
         # version for tagPosition creation with height and width instead of low-right corner coordinates
         # t = tagPosition
@@ -127,6 +119,19 @@ class Image(object):
 
     def getWindow(self, x, y):
         return self.image[x:x+self.windowSize[0], y:y+self.windowSize[1]]
+
+    def hogFeatureDetector(self, window):
+        if self.finalWindowResolution[0] <= 16:
+            pixels_per_cell = (4, 4)
+            cells_per_block = (2, 2)
+        else:
+            pixels_per_cell = (8, 8)
+            cells_per_block = (3, 3)
+
+        return feature.hog(window, pixels_per_cell=pixels_per_cell, cells_per_block=cells_per_block)
+
+    def daisyFeatureDetector(self, window):
+        return feature.daisy(window).ravel()
 
     def __process_window(self, window):
         if self.finalWindowResolution != self.windowSize:

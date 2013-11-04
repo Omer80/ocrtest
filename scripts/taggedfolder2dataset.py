@@ -36,6 +36,7 @@ if __name__ == '__main__':
     setup_image_factory((args.window_size, args.window_size),
                         (args.shift_size, args.shift_size),
                         (args.features_window_size, args.features_window_size),
+                        args.features_type,
                         False)
 
     dc = process_base_folder(args.folder,

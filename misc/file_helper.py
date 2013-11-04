@@ -38,6 +38,17 @@ class FileHelper:
         return matches
 
     @staticmethod
+    def read_images_in_dir_recursively(dir, load_pattern='.png:.jpg:.jpeg:.gif'):
+        load_pattern = tuple([ext.lower() for ext in load_pattern.split(':')])
+        matches = []
+        for dirpath, dirnames, filenames in os.walk(dir):
+            for filename in filenames:
+                if filename.lower().endswith(load_pattern):
+                    matches.append((dirpath, filename))
+
+        return matches
+
+    @staticmethod
     def create_or_clear_dir(dir):
         if os.path.exists(dir):
             FileHelper.remove_files_in_dir(dir)

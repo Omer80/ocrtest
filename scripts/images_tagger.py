@@ -11,6 +11,7 @@ class FolderTagger(object):
     def __init__(self):
         cv2.namedWindow('image')
         cv2.setMouseCallback('image', self.create_tag)
+        cv2.namedWindow('tag')
 
         self.drawing = False
         self.image = None
@@ -37,6 +38,7 @@ class FolderTagger(object):
             32: 'next',
         }
         showTagAction = set(range(48, 58))
+        fixTagAction = set([104, 105, 106, 107, 108, 111, 117, 121])
         moveActions = set([97, 98, 102, 103, 110, 115, 116])
 
         key = 0
@@ -55,6 +57,29 @@ class FolderTagger(object):
                         self.show_tag(self.tags[key - 49])
                     except IndexError:
                         pass
+
+            if key in fixTagAction:
+                ct = self.currentTag
+                if key == 121: # y
+                    tag = (ct[0], ct[1]-1, ct[2], ct[3])
+                if key == 104: # h
+                    tag = (ct[0], ct[1]+1, ct[2], ct[3])
+                if key == 117: # u
+                    tag = (ct[0], ct[1], ct[2], ct[3]-1)
+                if key == 106: # j
+                    tag = (ct[0], ct[1], ct[2], ct[3]+1)
+                if key == 105: # i
+                    tag = (ct[0]-1, ct[1], ct[2], ct[3])
+                if key == 111: # o
+                    tag = (ct[0]+1, ct[1], ct[2], ct[3])
+                if key == 107: # k
+                    tag = (ct[0], ct[1], ct[2]-1, ct[3])
+                if key == 108: # l
+                    tag = (ct[0], ct[1], ct[2]+1, ct[3])
+
+                self.show_tag(tag)
+                self.currentTag = tag
+                self.isNewTag = True
 
             if key in moveActions:
                 # n 110
@@ -81,13 +106,13 @@ class FolderTagger(object):
                                 self.tags = self.tags[:9]
                             self.isNewTag = False
 
-                    if key == 103:
+                    if key == 103:  # g
                         self.move(self.filename, os.path.join(self.goodPath, taggedFolder))
-                    if key == 98:
+                    if key == 98:   # b
                         self.move(self.filename, os.path.join(self.badPath, taggedFolder))
-                    if key == 116:
+                    if key == 116:  # t
                         self.move(self.filename, os.path.join(self.twitterPath, taggedFolder))
-                    if key == 102:
+                    if key == 102:  # f
                         self.move(self.filename, os.path.join(self.facebookPath, taggedFolder))
                     if key == 97:   # a
                         self.move(self.filename, os.path.join(self.awfulPath, taggedFolder))
@@ -122,6 +147,8 @@ class FolderTagger(object):
     def show_tag(self, tag, clear=True):
         if clear:
             self.clear()
+        if tag and tag[2] - tag[0] > 0 and tag[3] - tag[1] > 0:
+            cv2.imshow('tag', self.showedImage[tag[1]:tag[3], tag[0]:tag[2]])
         cv2.rectangle(self.showedImage, (tag[0], tag[1]), (tag[2], tag[3]), (255, 255, 255))
         self.currentTag = tag
 
@@ -145,17 +172,26 @@ class FolderTagger(object):
 
     def load(self, filename):
         self.image = cv2.imread(filename)
+        print self.image.shape
+        if self.image.shape[1] > 1024:
+            return False
         self.showedImage = self.image.copy()
+        return True
 
     def show_next(self):
         if not self.filelist:
             return False
 
-        self.filename = self.filelist.pop(0)
-        self.load(self.filename)
-        cv2.imshow('image', self.showedImage)
-        if self.currentTag is not None:
-            self.show_tag(self.currentTag, False)
+        loaded = False
+        while not loaded and len(self.filelist) > 0:
+            self.filename = self.filelist.pop(0)
+            loaded = self.load(self.filename)
+        if loaded:
+            cv2.imshow('image', self.showedImage)
+            if self.currentTag is not None:
+                self.show_tag(self.currentTag, False)
+        else:
+            return False
 
         return True
 
@@ -203,7 +239,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     ft = FolderTagger()
-    for fn in os.listdir(args.folder):
-        if os.path.isdir(os.path.join(args.folder, fn)):
-            if not ft.tag_folder(os.path.join(args.folder, fn), args.output):
-                break
+    # for fn in os.listdir(args.folder):
+    #     if os.path.isdir(os.path.join(args.folder, fn)):
+    #         if not ft.tag_folder(os.path.join(args.folder, fn), args.output):
+    #             break
+    ft.tag_folder(args.folder, args.output)

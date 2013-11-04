@@ -1,4 +1,5 @@
 
+from image.processing import setup_image_factory
 from dataset.image_folder_group import process_base_folder, save_dataset
 from ocr_utils import ArgParserWithDefaultHelp
 
@@ -16,6 +17,9 @@ def process_arguments():
     parser.add_argument('-n', '--neighbours-for-positive', dest='neighbours', default=7, type=int, help='Generate this neighbours amount for every positive window')
     parser.add_argument('-j', '--jobs', default=-1, type=int, help='Processes amount for feature extraction')
     parser.add_argument('-o', '--dataset-type', dest='dataset_type', default='csv', choices=['pkl', 'csv'], help='Type of dataset output')
+    parser.add_argument('-w', '--window-size', dest='window_size', default=64, type=int, help='Window size')
+    parser.add_argument('-s', '--shift-size', dest='shift_size', default=32, type=int, help='Shift size')
+    parser.add_argument('-f', '--features-type', dest='features_type', default='hog', choices=['hog', 'daisy'], help='Features detector')
     parser.add_argument('--only-first-symbol', dest='first_symbol_tag', action='store_true', help='Positive only on first symbol from tag')
     parser.set_defaults(first_symbol_tag=False)
 
@@ -27,6 +31,9 @@ if __name__ == '__main__':
     ocr_utils.init_console_logging()
 
     args = process_arguments()
+
+    setup_image_factory((args.window_size, args.window_size), (args.shift_size, args.shift_size), False)
+
     dc = process_base_folder(args.folder,
                              negativeMultiplicator=args.negmult,
                              rulesType=args.type,

@@ -1,6 +1,5 @@
 import random
 import numpy as np
-import logging
 
 from scipy import ndimage
 from skimage import feature
@@ -11,8 +10,23 @@ from skimage.transform import resize
 from image.window import sliding_window
 
 
+params = dict(windowSize=(64, 64), shiftSize=(32, 32), saveFeatures=False)
+
+
+def setup_image_factory(windowSize=(64, 64), shiftSize=(32, 32), saveFeatures=False):
+    global params
+    params = dict(windowSize=windowSize, shiftSize=shiftSize, saveFeatures=saveFeatures)
+
+
+def create_image(image, tagPosition=None):
+    global params
+    current_params = dict(params)
+    current_params['tagPosition'] = tagPosition
+    return Image(image, **current_params)
+
+
 class Image(object):
-    def __init__(self, image, windowSize=(32, 32), shiftSize=(16, 16), tagPosition=None, saveFeatures=False):
+    def __init__(self, image, windowSize=(64, 64), shiftSize=(32, 32), tagPosition=None, saveFeatures=False):
         if isinstance(image, basestring):
             self.imagePath = image
             self.rawImage = None
@@ -202,6 +216,6 @@ class Image(object):
 
 
 def process_single_image(filename, tagPosition, positiveImageTemplate=None, negativeMultiplicator=None, positiveWindowNeighboursAmount=7):
-    image = Image(filename, tagPosition=tagPosition)
+    image = create_image(filename, tagPosition=tagPosition)
     return image.process(positiveImageTemplate, negativeMultiplicator, positiveWindowNeighboursAmount)
 

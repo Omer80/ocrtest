@@ -6,7 +6,7 @@ from skimage.io import imsave
 from sklearn.externals import joblib
 from sklearn.externals.joblib import delayed, Parallel
 
-from image.processing import Image
+from image.processing import create_image
 from misc.file_helper import FileHelper
 
 
@@ -74,7 +74,7 @@ def process_file_list(classifier, filelist, countPositive, positiveOutputFolder=
     tasks = []
     for filename in filelist:
         total += 1
-        image = Image(filename)
+        image = create_image(filename)
         tasks.append(delayed(process_image)(classifier, image, positiveOutputFolder, negativeOutputFolder))
 
     p = Parallel(n_jobs=jobs, verbose=100)

@@ -10,12 +10,16 @@ from skimage.transform import resize
 from image.window import sliding_window
 
 
-params = dict(windowSize=(64, 64), shiftSize=(32, 32), saveFeatures=False)
+params = dict(windowSize=(64, 64), shiftSize=(32, 32), featuresWindowSize=(32, 32), featureDetector='hog', saveFeatures=False)
 
 
-def setup_image_factory(windowSize=(64, 64), shiftSize=(32, 32), saveFeatures=False):
+def setup_image_factory(windowSize=(64, 64), shiftSize=(32, 32), featuresWindowSize=(32, 32), featureDetector='hog', saveFeatures=False):
     global params
-    params = dict(windowSize=windowSize, shiftSize=shiftSize, saveFeatures=saveFeatures)
+    params = dict(windowSize=windowSize,
+                  shiftSize=shiftSize,
+                  featuresWindowSize=featuresWindowSize,
+                  featureDetector=featureDetector,
+                  saveFeatures=saveFeatures)
 
 
 def create_image(image, tagPosition=None):
@@ -25,8 +29,16 @@ def create_image(image, tagPosition=None):
     return Image(image, **current_params)
 
 
+def hogFeatureDetector(window):
+    return feature.hog(window)
+
+
+def daisyFeatureDetector(window):
+    return feature.daisy(window).ravel()
+
+
 class Image(object):
-    def __init__(self, image, windowSize=(64, 64), shiftSize=(32, 32), tagPosition=None, saveFeatures=False):
+    def __init__(self, image, windowSize=(64, 64), shiftSize=(32, 32), featuresWindowSize=(32, 32), featureDetector='hog', tagPosition=None, saveFeatures=False):
         if isinstance(image, basestring):
             self.imagePath = image
             self.rawImage = None
@@ -37,13 +49,18 @@ class Image(object):
         self.shiftSize = shiftSize
         self.saveFeatures = saveFeatures
 
+        if featureDetector == 'hog':
+            self.featureDetector = hogFeatureDetector
+        elif featureDetector == 'daisy':
+            self.featureDetector = daisyFeatureDetector
+
         # version for tagPosition creation with height and width instead of low-right corner coordinates
         # t = tagPosition
         # self.tagPosition = (t[0], t[1], t[0]+t[2], t[1]+t[2])
 
         self.tagPosition = tagPosition
 
-        self.finalWindowResolution = (32, 32)
+        self.finalWindowResolution = featuresWindowSize
 
     def prepare(self):
         if self.rawImage is None:
@@ -111,6 +128,12 @@ class Image(object):
     def getWindow(self, x, y):
         return self.image[x:x+self.windowSize[0], y:y+self.windowSize[1]]
 
+    def __process_window(self, window):
+        if self.finalWindowResolution != self.windowSize:
+            window = resize(window, self.finalWindowResolution)
+
+        return self.featureDetector(window)
+
     def extractAllFeatures(self, positiveImageTemplate=None):
         windowSize, shiftSize, tagPosition = self.windowSize, self.shiftSize, self.tagPosition
         # if positiveImageTemplate is not None:
@@ -126,8 +149,7 @@ class Image(object):
         for i, w in enumerate(windows):
             x, y = (i / s[1])*shiftSize[0], (i % s[1])*shiftSize[1]
 
-            wSized = resize(w, self.finalWindowResolution)
-            features = feature.hog(wSized)
+            features = self.__process_window(w)
 
             if self.tagPosition and self.isWindowInTagArea(x, y):
                 if positiveImageTemplate is not None:
@@ -183,9 +205,7 @@ class Image(object):
         j = 0
         positiveExamples = []
         for window in positiveWindows:
-            wSized = resize(window, self.finalWindowResolution)
-            features = feature.hog(wSized)
-            positiveExamples.append(features)
+            positiveExamples.append(self.__process_window(window))
 
             if positiveImageTemplate is not None:
                 try:
@@ -197,12 +217,7 @@ class Image(object):
 
         negativeExamples = []
         for window in negativeWindows:
-            if self.finalWindowResolution != self.windowSize:
-                wSized = resize(window, self.finalWindowResolution)
-            else:
-                wSized = window
-            features = feature.hog(wSized)
-            negativeExamples.append(features)
+            negativeExamples.append(self.__process_window(window))
 
         if self.saveFeatures:
             self.positiveExamples = positiveExamples

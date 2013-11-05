@@ -6,6 +6,7 @@ import numpy as np
 
 from classifier.windowed import WindowedFeatureClassifier
 from dataset.utils import load
+from misc.file_helper import FileHelper
 
 
 class ColorMap(object):
@@ -56,6 +57,7 @@ if __name__ == '__main__':
     import sys
     classifier = load(sys.argv[1])
     output = sys.argv[3]
+    FileHelper.create_or_clear_dir(output)
 
     colorMap = ColorMap((0, 255, 255), (0, 0, 255), 0.0, 1.0)
     wfc = WindowedFeatureClassifier(classifier)

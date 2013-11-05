@@ -103,7 +103,7 @@ class Image(object):
         else:
             return False
 
-    def createNeighbourWindows(self, x, y, amount=7):
+    def createNeighbourWindows(self, x, y, amount=7, certainThatWithTag=True):
         coordinates = set()
         tries = 0
         while len(coordinates) < amount or tries < amount * 5:
@@ -111,9 +111,9 @@ class Image(object):
             nx = int(random.gauss(x, self.shiftSize[0] / 2))
             ny = int(random.gauss(y, self.shiftSize[1] / 2))
             if nx >= 0 and nx + self.windowSize[0] < self.image.shape[0] \
-                    and ny >= 0 and ny + self.windowSize[1] < self.image.shape[1]\
-                    and self.isWindowInTagArea(nx, ny):
-                coordinates.add((nx, ny))
+                    and ny >= 0 and ny + self.windowSize[1] < self.image.shape[1]:
+                if (certainThatWithTag and self.isWindowInTagArea(nx, ny)) or not certainThatWithTag:
+                    coordinates.add((nx, ny))
 
         return [self.getWindow(nx, ny) for nx, ny in coordinates]
 
@@ -133,7 +133,7 @@ class Image(object):
     def daisyFeatureDetector(self, window):
         return feature.daisy(window).ravel()
 
-    def __process_window(self, window):
+    def process_window(self, window):
         if self.finalWindowResolution != self.windowSize:
             window = resize(window, self.finalWindowResolution)
 
@@ -154,7 +154,7 @@ class Image(object):
         for i, w in enumerate(windows):
             x, y = (i / s[1])*shiftSize[0], (i % s[1])*shiftSize[1]
 
-            features = self.__process_window(w)
+            features = self.process_window(w)
 
             if self.tagPosition and self.isWindowInTagArea(x, y):
                 if positiveImageTemplate is not None:
@@ -210,7 +210,7 @@ class Image(object):
         j = 0
         positiveExamples = []
         for window in positiveWindows:
-            positiveExamples.append(self.__process_window(window))
+            positiveExamples.append(self.process_window(window))
 
             if positiveImageTemplate is not None:
                 try:
@@ -222,7 +222,7 @@ class Image(object):
 
         negativeExamples = []
         for window in negativeWindows:
-            negativeExamples.append(self.__process_window(window))
+            negativeExamples.append(self.process_window(window))
 
         if self.saveFeatures:
             self.positiveExamples = positiveExamples

@@ -22,9 +22,12 @@ def process_image(classifier, patternMatcher, filename, output):
         if val >= 0.9:
             color = (255, 0, 0)
             shift = 0
-        else:
+        elif val >= 0.8:
             color = (0, 255, 0)
             shift = 1
+        else:
+            color = (255, 255, 0)
+            shift = -1
 
         cv2.rectangle(image, (loc[0]+shift, loc[1]+shift), (loc[0]+patternShape[0]+shift, loc[1]+patternShape[1]+shift), color, 1)
 

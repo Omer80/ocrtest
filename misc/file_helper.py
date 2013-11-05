@@ -13,7 +13,7 @@ class FileHelper:
             return
 
         for obj in os.listdir(path):
-            if os.path.isfile(obj):
+            if os.path.isfile(os.path.join(path, obj)):
                 os.remove(os.path.join(path, obj))
             else:
                 shutil.rmtree(os.path.join(path, obj))

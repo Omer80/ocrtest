@@ -30,28 +30,39 @@ class ColorMap(object):
         return int(color[0]), int(color[1]), int(color[2])
 
 
-if __name__ == '__main__':
-    import sys
-    classifier = load(sys.argv[1])
-
-    colorMap = ColorMap((0, 255, 255), (0, 0, 255), 0.0, 1.0)
-    wfc = WindowedFeatureClassifier(classifier)
-    filename, result = wfc.process_file(sys.argv[2])
+def process_file(wfc, filename, output):
+    filename, result = wfc.process_file(filename)
 
     # evaluation = np.array([e[0] for e in result])
 
     # plt.hist(evaluation, bins=50, log=True)
     # plt.show()
 
-    imageShowed = cv2.imread(sys.argv[2])
+    imageShowed = cv2.imread(filename)
     for r, (x1, y1, x2, y2) in result:
         cv2.rectangle(imageShowed, (y1, x1), (y2, x2), colorMap[r], 1)
 
-    path, filename = os.path.split(sys.argv[2])
+    path, filename = os.path.split(filename)
     bfn, ext = os.path.splitext(filename)
-    cv2.imwrite(os.path.join(sys.argv[3], bfn+'_wclrd'+ext), imageShowed)
+    cv2.imwrite(os.path.join(output, bfn+'_wclrd'+ext), imageShowed)
 
     # cv2.imshow('image', imageShowed)
     # key = 255
     # while key != 27:
     #     key = cv2.waitKey(20) & 0xFF
+
+
+if __name__ == '__main__':
+    import sys
+    classifier = load(sys.argv[1])
+    output = sys.argv[3]
+
+    colorMap = ColorMap((0, 255, 255), (0, 0, 255), 0.0, 1.0)
+    wfc = WindowedFeatureClassifier(classifier)
+    if os.path.isdir(sys.argv[2]):
+        dir = sys.argv[2]
+        for filename in os.listdir(dir):
+            if os.path.isfile(os.path.join(dir, filename)):
+                process_file(wfc, os.path.join(dir, filename), output)
+    else:
+        process_file(wfc, sys.argv[2], output)

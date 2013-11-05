@@ -1,4 +1,5 @@
 import os
+
 from image.pattern_matcher import PatternMatcher
 from misc.file_helper import FileHelper
 
@@ -15,10 +16,10 @@ if __name__ == '__main__':
 
     pm = PatternMatcher()
     # pm.load_patterns([sys.argv[1]], convert2GS=True)
-    pm.load_patterns_folder(sys.argv[1], convert2GS=True)
+    pm.load_patterns_folder(sys.argv[1])
     if os.path.isdir(sys.argv[2]):
         for dir, filename in FileHelper.read_images_in_dir_recursively(sys.argv[2]):
             print os.path.join(dir, filename)
-            pm.match(os.path.join(dir, filename), generateHist=True)
+            pm.match(os.path.join(dir, filename), visualise=True)
     else:
-        pm.match(sys.argv[2], generateHist=True)
+        pm.match(sys.argv[2], visualise=True)

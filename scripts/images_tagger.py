@@ -3,6 +3,7 @@ import shutil
 
 import cv2
 
+from dataset.image_folder import getTagCoordinates
 from misc.file_helper import FileHelper
 from ocr_utils import ArgParserWithDefaultHelp
 
@@ -172,8 +173,8 @@ class FolderTagger(object):
 
     def load(self, filename):
         self.image = cv2.imread(filename)
-        print self.image.shape
         if self.image.shape[1] > 1024:
+            print 'Skipped because of size'
             return False
         self.showedImage = self.image.copy()
         return True
@@ -201,6 +202,10 @@ class FolderTagger(object):
             folder = folder[:-1]
         self.currentFolder = folder
         self.uplevelFolder = os.path.split(folder)[-1]
+        try:
+            self.currentTag = getTagCoordinates(self.uplevelFolder, YX=False)
+        except ValueError:
+            pass
 
         self.negativePath = os.path.join(output, 'negative')
         self.goodPath = os.path.join(output, 'good')
@@ -239,8 +244,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     ft = FolderTagger()
-    # for fn in os.listdir(args.folder):
-    #     if os.path.isdir(os.path.join(args.folder, fn)):
-    #         if not ft.tag_folder(os.path.join(args.folder, fn), args.output):
-    #             break
-    ft.tag_folder(args.folder, args.output)
+    for fn in os.listdir(args.folder):
+        if os.path.isdir(os.path.join(args.folder, fn)):
+            if not ft.tag_folder(os.path.join(args.folder, fn), args.output):
+                break
+
+    # ft.tag_folder(args.folder, args.output)
